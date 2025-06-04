@@ -11,51 +11,77 @@ datasource db {
 }
 
 model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
+  id                    String    @id @default(cuid())
+  accountId             String    @unique
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
+  @@unique([providerId, accountId])
+  @@map("account")
 }
 
 model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
 }
 
 model User {
-  id            String         @id @default(cuid())
-  username      String         @unique
-  email         String?        @unique
-  image         String?
-  password      String?
-  role          Role           @default(USER)
-  accounts      Account[]
-  sessions      Session[]
-  configs       Config[]
-  versions      ConfigVersion[]
-  votes         Vote[]
-  comments      Comment[]
-  commentVotes  CommentVote[]
-  reports       Report[]
+  id             String          @id @default(cuid())
+  username       String          @unique
+  email          String?         @unique
+  image          String?
+  password       String?
+  role           Role            @default(USER)
+  accounts       Account[]
+  sessions       Session[]
+  configs        Config[]
+  versions       ConfigVersion[]
+  votes          Vote[]
+  comments       Comment[]
+  commentVotes   CommentVote[]
+  reports        Report[]
   socialAccounts SocialAccount[]
   suspendedUntil DateTime?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  
+  // Better Auth required fields
+  name           String?
+  emailVerified  Boolean         @default(false)
+
+  @@map("user")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@map("verification")
 }
 
 enum Role {
@@ -65,57 +91,57 @@ enum Role {
 }
 
 model Game {
-  id          String   @id @default(cuid())
-  steamId     String   @unique
-  name        String
-  imageUrl    String
-  configs     Config[]
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  steamId   String   @unique
+  name      String
+  imageUrl  String
+  configs   Config[]
+  createdAt DateTime @default(now())
 }
 
 model Config {
-  id             String           @id @default(cuid())
-  game           Game             @relation(fields: [gameId], references: [id])
+  id             String          @id @default(cuid())
+  game           Game            @relation(fields: [gameId], references: [id])
   gameId         String
-  createdBy      User             @relation(fields: [userId], references: [id])
+  createdBy      User            @relation(fields: [userId], references: [id])
   userId         String
   gamehubVersion String
   videoUrl       String?
-  isLegacy       Boolean          @default(false)
-  isHidden       Boolean          @default(false)
-  upvotes        Int              @default(0)
-  downvotes      Int              @default(0)
-  slug           String           @unique
+  isLegacy       Boolean         @default(false)
+  isHidden       Boolean         @default(false)
+  upvotes        Int             @default(0)
+  downvotes      Int             @default(0)
+  slug           String          @unique
   details        ConfigDetails?
   versions       ConfigVersion[]
   votes          Vote[]
   comments       Comment[]
   reports        Report[]
   tags           String[]
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
   @@unique([gameId, userId])
 }
 
 model ConfigDetails {
-  id              String           @id @default(cuid())
-  config           Config           @relation(fields: [configId], references: [id], onDelete: Cascade)
-  configId         String           @unique
-  language         String?
-  gameResolution   String
-  directxHub       DirectXHubType
-  envVars          String?
-  commandLine      String?
-  compatLayer      String
-  gpuDriver        String
-  audioDriver      AudioDriverType
-  dxvkVersion      String
-  vkd3dVersion     String
-  cpuTranslator    String
-  cpuCoreLimit     String
-  vramLimit        String
-  components       String[]
+  id             String          @id @default(cuid())
+  config         Config          @relation(fields: [configId], references: [id], onDelete: Cascade)
+  configId       String          @unique
+  language       String?
+  gameResolution String
+  directxHub     DirectXHubType
+  envVars        String?
+  commandLine    String?
+  compatLayer    String
+  gpuDriver      String
+  audioDriver    AudioDriverType
+  dxvkVersion    String
+  vkd3dVersion   String
+  cpuTranslator  String
+  cpuCoreLimit   String
+  vramLimit      String
+  components     String[]
 }
 
 model ConfigVersion {
@@ -170,16 +196,16 @@ model CommentVote {
 }
 
 model Report {
-  id          String       @id @default(cuid())
-  reporter    User         @relation(fields: [reporterId], references: [id])
-  reporterId  String
-  config      Config?      @relation(fields: [configId], references: [id], onDelete: SetNull)
-  configId    String?
-  comment     Comment?     @relation(fields: [commentId], references: [id], onDelete: SetNull)
-  commentId   String?
-  reason      String
-  status      ReportStatus @default(OPEN)
-  createdAt   DateTime     @default(now())
+  id         String       @id @default(cuid())
+  reporter   User         @relation(fields: [reporterId], references: [id])
+  reporterId String
+  config     Config?      @relation(fields: [configId], references: [id], onDelete: SetNull)
+  configId   String?
+  comment    Comment?     @relation(fields: [commentId], references: [id], onDelete: SetNull)
+  commentId  String?
+  reason     String
+  status     ReportStatus @default(OPEN)
+  createdAt  DateTime     @default(now())
 }
 
 enum DirectXHubType {

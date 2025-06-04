@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth/core": "^0.39.1",
+    "@auth/prisma-adapter": "^2.9.1",
     "@hookform/resolvers": "^3.9.0",
     "@next/swc-wasm-nodejs": "13.5.1",
     "@prisma/client": "^5.16.1",
@@ -54,6 +56,7 @@
     "input-otp": "^1.2.4",
     "lucide-react": "^0.446.0",
     "next": "13.5.1",
+    "next-auth": "^4.24.11",
     "next-themes": "^0.3.0",
     "postcss": "8.4.30",
     "prisma": "^5.16.1",
