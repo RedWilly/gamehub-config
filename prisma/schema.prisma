@@ -1,0 +1,211 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String         @id @default(cuid())
+  username      String         @unique
+  email         String?        @unique
+  image         String?
+  password      String?
+  role          Role           @default(USER)
+  accounts      Account[]
+  sessions      Session[]
+  configs       Config[]
+  versions      ConfigVersion[]
+  votes         Vote[]
+  comments      Comment[]
+  commentVotes  CommentVote[]
+  reports       Report[]
+  socialAccounts SocialAccount[]
+  suspendedUntil DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+enum Role {
+  ADMIN
+  MODERATOR
+  USER
+}
+
+model Game {
+  id          String   @id @default(cuid())
+  steamId     String   @unique
+  name        String
+  imageUrl    String
+  configs     Config[]
+  createdAt   DateTime @default(now())
+}
+
+model Config {
+  id             String           @id @default(cuid())
+  game           Game             @relation(fields: [gameId], references: [id])
+  gameId         String
+  createdBy      User             @relation(fields: [userId], references: [id])
+  userId         String
+  gamehubVersion String
+  videoUrl       String?
+  isLegacy       Boolean          @default(false)
+  isHidden       Boolean          @default(false)
+  upvotes        Int              @default(0)
+  downvotes      Int              @default(0)
+  slug           String           @unique
+  details        ConfigDetails?
+  versions       ConfigVersion[]
+  votes          Vote[]
+  comments       Comment[]
+  reports        Report[]
+  tags           String[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@unique([gameId, userId])
+}
+
+model ConfigDetails {
+  id              String           @id @default(cuid())
+  config           Config           @relation(fields: [configId], references: [id], onDelete: Cascade)
+  configId         String           @unique
+  language         String?
+  gameResolution   String
+  directxHub       DirectXHubType
+  envVars          String?
+  commandLine      String?
+  compatLayer      String
+  gpuDriver        String
+  audioDriver      AudioDriverType
+  dxvkVersion      String
+  vkd3dVersion     String
+  cpuTranslator    String
+  cpuCoreLimit     String
+  vramLimit        String
+  components       String[]
+}
+
+model ConfigVersion {
+  id             String   @id @default(cuid())
+  config         Config   @relation(fields: [configId], references: [id], onDelete: Cascade)
+  configId       String
+  updatedBy      User     @relation(fields: [userId], references: [id])
+  userId         String
+  versionNumber  Int
+  configSnapshot Json
+  changeSummary  String
+  createdAt      DateTime @default(now())
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  config    Config   @relation(fields: [configId], references: [id], onDelete: Cascade)
+  configId  String
+  value     Int      @db.SmallInt
+  createdAt DateTime @default(now())
+
+  @@unique([userId, configId])
+}
+
+model Comment {
+  id        String        @id @default(cuid())
+  content   String
+  user      User          @relation(fields: [userId], references: [id])
+  userId    String
+  config    Config        @relation(fields: [configId], references: [id], onDelete: Cascade)
+  configId  String
+  upvotes   Int           @default(0)
+  downvotes Int           @default(0)
+  votes     CommentVote[]
+  reports   Report[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model CommentVote {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId String
+  value     Int      @db.SmallInt
+  createdAt DateTime @default(now())
+
+  @@unique([userId, commentId])
+}
+
+model Report {
+  id          String       @id @default(cuid())
+  reporter    User         @relation(fields: [reporterId], references: [id])
+  reporterId  String
+  config      Config?      @relation(fields: [configId], references: [id], onDelete: SetNull)
+  configId    String?
+  comment     Comment?     @relation(fields: [commentId], references: [id], onDelete: SetNull)
+  commentId   String?
+  reason      String
+  status      ReportStatus @default(OPEN)
+  createdAt   DateTime     @default(now())
+}
+
+enum DirectXHubType {
+  DISABLE
+  SIMPLE
+  COMPLETE
+}
+
+enum AudioDriverType {
+  PULSE
+  ALSA
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWED
+  DISMISSED
+}
+
+model SocialAccount {
+  id             String   @id @default(cuid())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  provider       String
+  providerUserId String
+  createdAt      DateTime @default(now())
+
+  @@unique([provider, providerUserId])
+}
