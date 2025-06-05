@@ -126,7 +126,11 @@ export const canEditContent = (userRole: string, contentOwnerId: string, current
     }
     
     // Users can only edit their own content
-    return contentOwnerId === currentUserId;
+    if (userRole === 'USER') {
+        return contentOwnerId === currentUserId;
+    }
+    
+    return false;
 };
 
 export const canDeleteContent = (userRole: string, contentOwnerId: string, currentUserId: string): boolean => {
