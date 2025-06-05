@@ -1,9 +1,41 @@
 "use client"
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { TowerControl } from 'lucide-react';
+import { TowerControl, User } from 'lucide-react';
+import { useSession, signOut } from '@/lib/auth-client';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function Header() {
+  const { data: session, isPending } = useSession();
+  const isAuthenticated = !isPending && session?.user !== null;
+  
+  /**
+   * Gets the user's initials from their display name or username
+   * @returns The user's initials or a fallback icon
+   */
+  const getUserInitials = (): string => {
+    if (!session?.user) return 'U';
+    
+    const displayName = session.user.displayUsername || session.user.username || session.user.name;
+    
+    if (!displayName) return 'U';
+    
+    return displayName
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
@@ -25,8 +57,50 @@ export function Header() {
             </Button>
           </nav>
           <nav className="flex items-center space-x-2">
-            <Button variant="ghost">Sign In</Button>
-            <Button>Sign Up</Button>
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={session?.user?.image || ''} alt={session?.user?.displayUsername || session?.user?.username || 'User'} />
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {session?.user?.displayUsername || session?.user?.username}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard">Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={() => signOut()}
+                    className="cursor-pointer"
+                  >
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link href="/signin">Sign In</Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/signup">Sign Up</Link>
+                </Button>
+              </>
+            )}
           </nav>
         </div>
       </div>
