@@ -52,7 +52,6 @@ model User {
   email          String?         @unique
   displayUsername String?
   image          String?
-  password       String?
   role           Role            @default(USER)
   accounts       Account[]
   sessions       Session[]

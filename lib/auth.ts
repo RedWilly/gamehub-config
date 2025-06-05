@@ -3,7 +3,7 @@ import {
 } from 'better-auth';
 import { PrismaClient } from "@prisma/client";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { username, admin } from "better-auth/plugins";
+import { username, admin, customSession } from "better-auth/plugins";
 import { ac, adminRole, moderatorRole, userRole } from "./permissions";
 
 // Create database client
@@ -35,6 +35,23 @@ export const auth = betterAuth({
             },
             defaultRole: "user",
             adminRoles: ["admin"],
+        }),
+        customSession(async ({ user, session }) => {
+            // Get the full user data including suspendedUntil field
+            const fullUser = await db.user.findUnique({
+                where: { id: user.id },
+                select: {
+                    suspendedUntil: true
+                }
+            });
+            
+            return {
+                user: {
+                    ...user,
+                    suspendedUntil: fullUser?.suspendedUntil || null
+                },
+                session
+            };
         }),
     ],
 });

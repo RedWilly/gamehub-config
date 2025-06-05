@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useIsSuspended } from "@/lib/auth-client"; // Import the new hook
 
 /**
  * Page displayed when a user is suspended
@@ -14,11 +15,12 @@ export const metadata: Metadata = {
 
 export default function SuspendedPage() {
   const { data: session } = useSession();
+  const isSuspended = useIsSuspended(); // Use the new hook
   
-  // Better Auth session structure might not have suspendedUntil directly
-  // We need to handle it safely
-  const suspendedUntil = session?.user && 'suspendedUntil' in session.user 
-    ? new Date(session.user.suspendedUntil as string) 
+  // Get suspendedUntil from the session data
+  // The customSession plugin ensures this field is always available
+  const suspendedUntil = session?.user?.suspendedUntil 
+    ? new Date(session.user.suspendedUntil) 
     : null;
   
   const formattedDate = suspendedUntil 
@@ -30,6 +32,29 @@ export default function SuspendedPage() {
         minute: "2-digit",
       })
     : "unknown date";
+
+  // If user is not suspended, redirect them to home
+  if (!isSuspended) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] p-4">
+        <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
+          <h1 className="text-2xl font-bold text-center text-green-600 dark:text-green-400 mb-6">
+            Account Active
+          </h1>
+          <p className="text-gray-700 dark:text-gray-300 text-center mb-6">
+            Your account is currently active. You will be redirected to the home page.
+          </p>
+          <div className="flex justify-center">
+            <Button asChild>
+              <Link href="/">
+                Go to Home
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] p-4">
