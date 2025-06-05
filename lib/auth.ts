@@ -1,17 +1,14 @@
 import {
     betterAuth
 } from 'better-auth';
-import { PrismaClient } from "@prisma/client";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { username, admin, customSession } from "better-auth/plugins";
 import { ac, adminRole, moderatorRole, userRole } from "./permissions";
-
-// Create database client
-const db = new PrismaClient();
+import { prisma } from "./prisma";
 
 // Create and export auth instance
 export const auth = betterAuth({
-    database: prismaAdapter(db, {
+    database: prismaAdapter(prisma, {
 		provider: "postgresql",
 	}),
     emailAndPassword: {
@@ -38,7 +35,7 @@ export const auth = betterAuth({
         }),
         customSession(async ({ user, session }) => {
             // Get the full user data including suspendedUntil field
-            const fullUser = await db.user.findUnique({
+            const fullUser = await prisma.user.findUnique({
                 where: { id: user.id },
                 select: {
                     suspendedUntil: true
