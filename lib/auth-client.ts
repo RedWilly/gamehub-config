@@ -2,48 +2,8 @@ import {
     createAuthClient
 } from "better-auth/react";
 import { usernameClient, adminClient } from "better-auth/client/plugins";
-import { createAccessControl } from "better-auth/plugins/access";
 import { useState, useEffect } from 'react';
-
-/**
- * Define access control permissions for the GameHub platform
- * This must match the server-side definitions in auth.ts
- */
-const statement = {
-    // Default admin permissions
-    user: ["create", "list", "set-role", "ban", "impersonate", "delete"],
-    session: ["list", "revoke", "delete"],
-    
-    // GameHub specific permissions
-    config: ["create", "update", "delete", "hide", "feature"],
-    game: ["create", "update", "delete"],
-    comment: ["create", "delete", "hide"],
-    report: ["review", "resolve", "dismiss"]
-} as const;
-
-// Create access control with defined permissions
-const ac = createAccessControl(statement);
-
-// Define roles with specific permissions
-const adminRole = ac.newRole({
-    user: ["create", "list", "set-role", "ban", "impersonate", "delete"],
-    session: ["list", "revoke", "delete"],
-    config: ["create", "update", "delete", "hide", "feature"],
-    game: ["create", "update", "delete"],
-    comment: ["delete", "hide"],
-    report: ["review", "resolve", "dismiss"]
-});
-
-const moderatorRole = ac.newRole({
-    config: ["hide", "feature"],
-    comment: ["delete", "hide"],
-    report: ["review", "resolve", "dismiss"]
-});
-
-const userRole = ac.newRole({
-    config: ["create", "update"],
-    comment: ["create"]
-});
+import { ac, adminRole, moderatorRole, userRole } from "./permissions";
 
 /**
  * Create auth client with plugins for authentication and authorization
