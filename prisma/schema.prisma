@@ -50,6 +50,7 @@ model User {
   id             String          @id @default(cuid())
   username       String          @unique
   email          String?         @unique
+  displayUsername String?
   image          String?
   password       String?
   role           Role            @default(USER)
