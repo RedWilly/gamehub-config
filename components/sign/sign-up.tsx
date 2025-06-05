@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 export default function SignUp() {
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
+	const [username, setUsername] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [passwordConfirmation, setPasswordConfirmation] = useState("");
@@ -75,6 +76,18 @@ export default function SignUp() {
 								value={lastName}
 							/>
 						</div>
+					</div>
+					<div className="grid gap-2">
+						<Label htmlFor="username">Username</Label>
+						<Input
+							id="username"
+							placeholder="maxrobinson"
+							required
+							onChange={(e) => {
+								setUsername(e.target.value);
+							}}
+							value={username}
+						/>
 					</div>
 					<div className="grid gap-2">
 						<Label htmlFor="email">Email</Label>
@@ -153,6 +166,7 @@ export default function SignUp() {
 								email,
 								password,
 								name: `${firstName} ${lastName}`,
+								username,
 								image: image ? await convertImageToBase64(image) : "",
 								callbackURL: "/dashboard",
 								fetchOptions: {
