@@ -34,18 +34,20 @@ export const auth = betterAuth({
             adminRoles: ["admin"],
         }),
         customSession(async ({ user, session }) => {
-            // Get the full user data including suspendedUntil field
+            // Get the full user data including suspendedUntil and role field
             const fullUser = await prisma.user.findUnique({
                 where: { id: user.id },
                 select: {
-                    suspendedUntil: true
+                    suspendedUntil: true,
+                    role: true
                 }
             });
             
             return {
                 user: {
                     ...user,
-                    suspendedUntil: fullUser?.suspendedUntil || null
+                    suspendedUntil: fullUser?.suspendedUntil || null,
+                    role: fullUser?.role
                 },
                 session
             };
