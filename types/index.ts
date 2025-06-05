@@ -3,17 +3,19 @@ export type Role = 'admin' | 'moderator' | 'user';
 
 export interface User {
   id: string;
+  name?: string;
   username: string;
-  email: string;
+  displayUsername: string;
+  email?: string;
   role: Role;
-  suspended_until: Date | null;
-  created_at: Date;
+  suspendedUntil?: Date | null;
+  createdAt: Date;
 }
 
 export interface SocialAccount {
   id: string;
   user_id: string;
-  provider: 'google' | 'github';
+  provider: 'github';
   provider_user_id: string;
 }
 
@@ -29,8 +31,8 @@ export interface Config {
   is_hidden: boolean;
   upvotes: number;
   downvotes: number;
-  created_at: Date;
-  updated_at: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface ConfigDetails {
@@ -58,7 +60,7 @@ export interface ConfigVersionHistory {
   config_snapshot: ConfigDetails;
   updated_by: string;
   change_summary: string;
-  created_at: Date;
+  createdAt: Date;
 }
 
 export interface ConfigVote {
@@ -66,7 +68,7 @@ export interface ConfigVote {
   user_id: string;
   config_id: string;
   vote: -1 | 1;
-  created_at: Date;
+  createdAt: Date;
 }
 
 // Comment Types
@@ -77,8 +79,8 @@ export interface Comment {
   content: string;
   upvotes: number;
   downvotes: number;
-  created_at: Date;
-  updated_at: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CommentVote {
@@ -86,7 +88,7 @@ export interface CommentVote {
   user_id: string;
   comment_id: string;
   vote: -1 | 1;
-  created_at: Date;
+  createdAt: Date;
 }
 
 // Report Types
@@ -97,7 +99,7 @@ export interface Report {
   reported_comment_id?: string;
   reason: string;
   status: 'open' | 'reviewed' | 'dismissed';
-  created_at: Date;
+  createdAt: Date;
 }
 
 // Steam API Types
