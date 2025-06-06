@@ -5,6 +5,7 @@
 
 import { UseFormReturn } from "react-hook-form";
 import { AudioDriverType } from "@prisma/client";
+import { useState, useEffect } from "react";
 
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -38,7 +39,7 @@ const VKD3D_TRANSLATOR_PRESETS = [
   { label: "None", value: "none" }
 ];
 
-// VKD3D translator presets
+// DXVK translator presets
 const DXVK_TRANSLATOR_PRESETS = [
   { label: "Dxvk-2.6.1-async", value: "dxvk-2.6.1-async" },
   { label: "Dxvk-2.6", value: "dxvk-2.6" },
@@ -89,11 +90,19 @@ export function CompatibilityConfigFields({ form }: CompatibilityConfigFieldsPro
   const cpuTranslatorValue = form.watch("details.cpuTranslator");
   const isCustomCpuTranslator = !CPU_TRANSLATOR_PRESETS.some(preset => preset.value === cpuTranslatorValue);
 
-  const vkd3dVersionValue = form.watch("details.vkd3dVersion");
-  const isCustomVkd3dVersion = !VKD3D_TRANSLATOR_PRESETS.some(preset => preset.value === vkd3dVersionValue);
+  // Use explicit state for custom version checkboxes
+  const [isCustomVkd3dVersion, setIsCustomVkd3dVersion] = useState(false);
+  const [isCustomDxvkVersion, setIsCustomDxvkVersion] = useState(false);
 
-  const dxvkVersionValue = form.watch("details.dxvkVersion");
-  const isCustomDxvkVersion = !DXVK_TRANSLATOR_PRESETS.some(preset => preset.value === dxvkVersionValue);
+  // Initialize with default values from presets if not set
+  useEffect(() => {
+    if (!form.getValues("details.dxvkVersion")) {
+      form.setValue("details.dxvkVersion", DXVK_TRANSLATOR_PRESETS[0].value);
+    }
+    if (!form.getValues("details.vkd3dVersion")) {
+      form.setValue("details.vkd3dVersion", VKD3D_TRANSLATOR_PRESETS[0].value);
+    }
+  }, [form]);
 
   return (
     <div className="space-y-6">
@@ -249,6 +258,7 @@ export function CompatibilityConfigFields({ form }: CompatibilityConfigFieldsPro
                   } else {
                     form.setValue("details.dxvkVersion", DXVK_TRANSLATOR_PRESETS[0].value);
                   }
+                  setIsCustomDxvkVersion(!!checked);
                 }}
               />
               <label
@@ -311,6 +321,7 @@ export function CompatibilityConfigFields({ form }: CompatibilityConfigFieldsPro
                   } else {
                     form.setValue("details.vkd3dVersion", VKD3D_TRANSLATOR_PRESETS[0].value);
                   }
+                  setIsCustomVkd3dVersion(!!checked);
                 }}
               />
               <label

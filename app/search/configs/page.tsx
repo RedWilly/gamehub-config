@@ -26,11 +26,6 @@ import { UserConfigList } from "@/components/configs/list/UserConfigList";
 const COMMON_TAGS = [
   "Optimized for FPS",
   "Low-end Devices",
-  "Stable Build",
-  "High Performance",
-  "Battery Efficient",
-  "Controller Support",
-  "Touchscreen Optimized"
 ];
 
 // Sort options

@@ -19,11 +19,6 @@ import { ConfigFormValues } from "./ConfigForm";
 const PREDEFINED_TAGS = [
   { id: "optimized-fps", label: "Optimized for FPS" },
   { id: "low-end-devices", label: "Low-end Devices" },
-  { id: "stable-build", label: "Stable Build" },
-  { id: "high-performance", label: "High Performance" },
-  { id: "battery-efficient", label: "Battery Efficient" },
-  { id: "controller-support", label: "Controller Support" },
-  { id: "touchscreen-optimized", label: "Touchscreen Optimized" }
 ];
 
 interface TagsConfigFieldsProps {
