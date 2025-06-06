@@ -6,9 +6,11 @@
 import { prisma } from '../prisma';
 import { getGameInfo } from '../steam';
 import { uploadImageToGitHub } from '../github-upload';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 /**
  * Fetches or creates a game by Steam App ID
+ * Uses a race-condition safe approach with proper error handling
  * 
  * @param steamId - The Steam App ID
  * @returns The game object or null if not found/created
@@ -36,29 +38,56 @@ export async function getOrCreateGame(steamId: string): Promise<{
       return null;
     }
 
-    // Upload image to GitHub if available
-    let githubImageUrl: string | null = null;
+    // Prepare image URL - default to Steam image or placeholder
+    let finalImageUrl = gameInfo.imageUrl || `https://via.placeholder.com/460x215?text=${encodeURIComponent(gameInfo.name)}`;
+
+    // Try to upload image to GitHub if available
     if (gameInfo.imageUrl) {
-      const fileName = `${steamId}.jpg`;
-      githubImageUrl = await uploadImageToGitHub({
-        imageUrl: gameInfo.imageUrl,
-        fileName,
-      });
+      try {
+        const fileName = `${steamId}.jpg`;
+        const githubImageUrl = await uploadImageToGitHub({
+          imageUrl: gameInfo.imageUrl,
+          fileName,
+        });
+        
+        // Only update URL if upload was successful
+        if (githubImageUrl) {
+          finalImageUrl = githubImageUrl;
+        }
+      } catch (uploadError) {
+        // Log error but continue with original image URL
+        console.error('Error uploading image to GitHub:', uploadError);
+        // We'll fall back to the Steam image URL
+      }
     }
 
-    // If image upload failed or no image URL was provided, use original Steam image URL or a placeholder
-    const finalImageUrl = githubImageUrl || gameInfo.imageUrl || `https://via.placeholder.com/460x215?text=${encodeURIComponent(gameInfo.name)}`;
-
-    // Create new game in database
-    const newGame = await prisma.game.create({
-      data: {
-        steamId: gameInfo.steamId,
-        name: gameInfo.name,
-        imageUrl: finalImageUrl,
-      },
-    });
-
-    return newGame;
+    try {
+      // Try to create the game record
+      const newGame = await prisma.game.create({
+        data: {
+          steamId: gameInfo.steamId,
+          name: gameInfo.name,
+          imageUrl: finalImageUrl,
+        },
+      });
+      
+      return newGame;
+    } catch (createError) {
+      // If error is a unique constraint violation, another process likely created the game
+      if (createError instanceof PrismaClientKnownRequestError && createError.code === 'P2002') {
+        // Try to fetch the game that was just created by another process
+        const justCreatedGame = await prisma.game.findUnique({
+          where: { steamId },
+        });
+        
+        if (justCreatedGame) {
+          return justCreatedGame;
+        }
+      }
+      
+      // Re-throw other errors
+      throw createError;
+    }
   } catch (error) {
     console.error('Error in getOrCreateGame:', error);
     return null;

@@ -22,6 +22,7 @@ interface UploadImageOptions {
 
 /**
  * Uploads an image to GitHub repository
+ * Handles existing files gracefully to prevent 409 conflicts
  * 
  * @param options - Upload options containing image URL and file name
  * @returns Raw URL of the uploaded image or null if upload fails
@@ -29,6 +30,26 @@ interface UploadImageOptions {
 export async function uploadImageToGitHub(options: UploadImageOptions): Promise<string | null> {
   try {
     const { imageUrl, fileName } = options;
+    const path = `images/${fileName}`;
+    const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/${path}`;
+    
+    // Check if file already exists
+    try {
+      const { data: existingFile } = await octokit.repos.getContent({
+        owner,
+        repo,
+        path,
+      });
+      
+      // If file exists, just return the URL without trying to upload again
+      if ('sha' in existingFile) {
+        console.log(`Image ${fileName} already exists in GitHub, using existing URL`);
+        return rawUrl;
+      }
+    } catch (error) {
+      // File doesn't exist, which is fine - we'll create it
+      console.log(`Image ${fileName} doesn't exist in GitHub yet, will create it`);
+    }
     
     // Fetch the image from URL
     const imageResponse = await fetch(imageUrl);
@@ -41,34 +62,25 @@ export async function uploadImageToGitHub(options: UploadImageOptions): Promise<
     const buffer = Buffer.from(arrayBuffer);
     const content = buffer.toString('base64');
     
-    // Check if file already exists
-    let sha: string | undefined;
-    try {
-      const { data: existingFile } = await octokit.repos.getContent({
-        owner,
-        repo,
-        path: `images/${fileName}`,
-      });
-      
-      if ('sha' in existingFile) {
-        sha = existingFile.sha;
-      }
-    } catch (error) {
-      // File doesn't exist, which is fine
-    }
-    
-    // Upload or update file in GitHub repository
-    const response = await octokit.repos.createOrUpdateFileContents({
+    // Upload file to GitHub repository
+    await octokit.repos.createOrUpdateFileContents({
       owner,
       repo,
-      path: `images/${fileName}`,
+      path,
       message: `Upload game image for ${fileName}`,
       content,
-      sha,
+      // No SHA means create new file
+    }).catch(error => {
+      // If error is 409 (conflict), the file was created by another process
+      if (error.status === 409) {
+        console.log(`Conflict while uploading ${fileName}, another process likely created it`);
+        return; // We'll return the raw URL anyway
+      }
+      throw error; // Re-throw other errors
     });
     
     // Return raw URL to the image
-    return `https://raw.githubusercontent.com/${owner}/${repo}/main/images/${fileName}`;
+    return rawUrl;
   } catch (error) {
     console.error('GitHub upload error:', error);
     return null;
