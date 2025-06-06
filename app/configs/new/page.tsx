@@ -44,7 +44,10 @@ export default function NewConfigPage(): JSX.Element {
       }
 
       try {
-        // First try to get the game from our database
+        /**
+         * First try to get the game from our database
+         * If not found, fetch from Steam API and save to database(if cache is true) if not fetch from steam api
+         */
         const response = await fetch(`/api/games/steam/${steamId}?cache=true`);
         
         if (!response.ok) {
