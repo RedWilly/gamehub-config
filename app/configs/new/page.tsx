@@ -45,7 +45,7 @@ export default function NewConfigPage(): JSX.Element {
 
       try {
         // First try to get the game from our database
-        const response = await fetch(`/api/games/steam/${steamId}`);
+        const response = await fetch(`/api/games/steam/${steamId}?cache=true`);
         
         if (!response.ok) {
           throw new Error("Failed to fetch game data");
