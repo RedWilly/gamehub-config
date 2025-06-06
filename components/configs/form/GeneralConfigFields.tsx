@@ -15,11 +15,11 @@ import { ConfigFormValues } from "./ConfigForm";
 
 // Common resolution presets
 const RESOLUTION_PRESETS = [
-  { label: "720p (1280x720)", value: "1280x720" },
-  { label: "1080p (1920x1080)", value: "1920x1080" },
-  { label: "1440p (2560x1440)", value: "2560x1440" },
-  { label: "4K (3840x2160)", value: "3840x2160" },
-  { label: "Custom", value: "custom" }
+  {label: "800 x 600", value: "800x600"},
+  { label: "960 x 544", value: "960x544" },
+  { label: "1280 x 720", value: "1280x720" },
+  { label: "1920 x 1080", value: "1920x1080" },
+  { label: "Custom", value: "custom" } // Custom resolution format: "width x height"
 ];
 
 // Language presets
@@ -35,7 +35,7 @@ const LANGUAGE_PRESETS = [
   { label: "Russian", value: "ru_RU" },
   { label: "Chinese (Simplified)", value: "zh_CN" },
   { label: "Chinese (Traditional)", value: "zh_TW" },
-  { label: "Custom", value: "custom" }
+  { label: "Custom", value: "custom" } // Custom language code
 ];
 
 interface GeneralConfigFieldsProps {

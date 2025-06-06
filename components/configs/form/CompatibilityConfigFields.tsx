@@ -9,27 +9,44 @@ import { AudioDriverType } from "@prisma/client";
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import { ConfigFormValues } from "./ConfigForm";
 
 // Compatibility layer presets
 const COMPAT_LAYER_PRESETS = [
+  { label: "Proton 9.0-arm64x-2", value: "Proton9.0-arm64x-2" },
   { label: "Proton 9.0-x64-2", value: "Proton9.0-x64-2" },
-  { label: "Proton 8.0-x64", value: "Proton8.0-x64" },
   { label: "Proton 7.0-x64", value: "Proton7.0-x64" },
-  { label: "Proton Experimental", value: "ProtonExperimental" },
-  { label: "Wine 9.0", value: "Wine9.0" },
-  { label: "Wine 8.0", value: "Wine8.0" },
-  { label: "Custom", value: "custom" }
+  { label: "Wine 10.0-x64-1", value: "wine10.0-x64-1" },
+  { label: "Wine 9.5.0-x64-1", value: "wine9.5.0-x64-1" },
+  { label: "Wine 9.16-x64-1", value: "wine9.16-x64-1" },
 ];
 
 // CPU translator presets
 const CPU_TRANSLATOR_PRESETS = [
-  { label: "fastpipe", value: "fastpipe" },
-  { label: "qemu", value: "qemu" },
-  { label: "box86", value: "box86" },
-  { label: "box64", value: "box64" },
-  { label: "Custom", value: "custom" }
+  { label: "Box64-0.35", value: "Box64-0.35" },
+  { label: "Box64-0.32.1", value: "Box64-0.32.1" },
+  { label: "Box64-0.28", value: "Box64-0.28" },
+];
+
+// VKD3D translator presets
+const VKD3D_TRANSLATOR_PRESETS = [
+  { label: "Vkd3d-proton-2.14.1", value: "vkd3d-proton-2.14.1" },
+  { label: "Vkd3d-2.13", value: "vkd3d-2.13" },
+  { label: "Vkd3d-2.12", value: "vkd3d-2.12" },
+  { label: "None", value: "none" }
+];
+
+// VKD3D translator presets
+const DXVK_TRANSLATOR_PRESETS = [
+  { label: "Dxvk-2.6.1-async", value: "dxvk-2.6.1-async" },
+  { label: "Dxvk-2.6", value: "dxvk-2.6" },
+  { label: "Dxvk-2.5.3", value: "dxvk-2.5.3" },
+  { label: "Dxvk-2.4", value: "dxvk-2.4" },
+  { label: "Dxvk-2.3.1", value: "dxvk-2.3.1" },
+  { label: "Dxvk-2.2", value: "dxvk-2.2" },
+  { label: "None", value: "none" }
 ];
 
 // CPU core limit options
@@ -71,6 +88,12 @@ export function CompatibilityConfigFields({ form }: CompatibilityConfigFieldsPro
   
   const cpuTranslatorValue = form.watch("details.cpuTranslator");
   const isCustomCpuTranslator = !CPU_TRANSLATOR_PRESETS.some(preset => preset.value === cpuTranslatorValue);
+
+  const vkd3dVersionValue = form.watch("details.vkd3dVersion");
+  const isCustomVkd3dVersion = !VKD3D_TRANSLATOR_PRESETS.some(preset => preset.value === vkd3dVersionValue);
+
+  const dxvkVersionValue = form.watch("details.dxvkVersion");
+  const isCustomDxvkVersion = !DXVK_TRANSLATOR_PRESETS.some(preset => preset.value === dxvkVersionValue);
 
   return (
     <div className="space-y-6">
@@ -188,17 +211,55 @@ export function CompatibilityConfigFields({ form }: CompatibilityConfigFieldsPro
           <FormItem>
             <FormLabel>DXVK Version</FormLabel>
             <FormControl>
-              <Input 
-                placeholder="e.g., 1.9.4" 
-                value={field.value || ""}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                name={field.name}
-                ref={field.ref}
-              />
+              {isCustomDxvkVersion ? (
+                <Input 
+                  placeholder="e.g., 1.9.4" 
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
+                />
+              ) : (
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value || ""}
+                  value={field.value || ""}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select DXVK version" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DXVK_TRANSLATOR_PRESETS.map((preset) => (
+                      <SelectItem key={preset.value} value={preset.value}>
+                        {preset.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </FormControl>
+            <div className="flex items-center mt-2">
+              <Checkbox
+                id="custom-dxvk-version"
+                checked={isCustomDxvkVersion}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    form.setValue("details.dxvkVersion", "");
+                  } else {
+                    form.setValue("details.dxvkVersion", DXVK_TRANSLATOR_PRESETS[0].value);
+                  }
+                }}
+              />
+              <label
+                htmlFor="custom-dxvk-version"
+                className="text-sm font-medium leading-none ml-2 cursor-pointer"
+              >
+                Use custom DXVK version
+              </label>
+            </div>
             <FormDescription>
-              The DXVK version used (enter N/A if not applicable)
+              The DXVK version used (enter N/A if set yours as None)
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -212,17 +273,55 @@ export function CompatibilityConfigFields({ form }: CompatibilityConfigFieldsPro
           <FormItem>
             <FormLabel>VKD3D Version</FormLabel>
             <FormControl>
-              <Input 
-                placeholder="e.g., 2.8" 
-                value={field.value || ""}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                name={field.name}
-                ref={field.ref}
-              />
+              {isCustomVkd3dVersion ? (
+                <Input 
+                  placeholder="e.g., 2.8" 
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
+                />
+              ) : (
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value || ""}
+                  value={field.value || ""}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select VKD3D version" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {VKD3D_TRANSLATOR_PRESETS.map((preset) => (
+                      <SelectItem key={preset.value} value={preset.value}>
+                        {preset.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </FormControl>
+            <div className="flex items-center mt-2">
+              <Checkbox
+                id="custom-vkd3d-version"
+                checked={isCustomVkd3dVersion}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    form.setValue("details.vkd3dVersion", "");
+                  } else {
+                    form.setValue("details.vkd3dVersion", VKD3D_TRANSLATOR_PRESETS[0].value);
+                  }
+                }}
+              />
+              <label
+                htmlFor="custom-vkd3d-version"
+                className="text-sm font-medium leading-none ml-2 cursor-pointer"
+              >
+                Use custom VKD3D version
+              </label>
+            </div>
             <FormDescription>
-              The VKD3D version used (enter N/A if not applicable)
+              The VKD3D version used (enter N/A if set yours as None)
             </FormDescription>
             <FormMessage />
           </FormItem>
