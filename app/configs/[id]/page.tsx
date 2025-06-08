@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Loader2, Edit, ThumbsUp, ThumbsDown, Clock, Tag, Download, History, RotateCcw } from "lucide-react";
+import { Loader2, Edit, ThumbsUp, ThumbsDown, Clock, Tag, Download, History, RotateCcw, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -22,6 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSession } from "@/lib/auth-client";
 import { VoteButtons } from "@/components/configs/VoteButtons";
+import { CommentList } from "@/components/comments/comment-list";
 
 interface ConfigDetailsPageProps {
   params: {
@@ -263,13 +264,17 @@ export default function ConfigDetailsPage({ params }: ConfigDetailsPageProps): J
 
         {/* Config Content Tabs */}
         <Tabs defaultValue="details" className="mt-8">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="compatibility">Compatibility</TabsTrigger>
             <TabsTrigger value="components">Components</TabsTrigger>
             <TabsTrigger value="versions" className="flex items-center gap-2">
               <History className="h-4 w-4" />
               <span>Versions</span>
+            </TabsTrigger>
+            <TabsTrigger value="comments" className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              <span>Comments</span>
             </TabsTrigger>
           </TabsList>
           
@@ -485,6 +490,21 @@ export default function ConfigDetailsPage({ params }: ConfigDetailsPageProps): J
                 ) : (
                   <p className="text-muted-foreground">No version history available</p>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* Comments Tab */}
+          <TabsContent value="comments" className="mt-6">
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold">Community Comments</h3>
+                <p className="text-sm text-muted-foreground">
+                  Share your thoughts and experiences with this configuration
+                </p>
+              </CardHeader>
+              <CardContent>
+                <CommentList configId={id} />
               </CardContent>
             </Card>
           </TabsContent>
