@@ -14,18 +14,53 @@ import { Role } from "@prisma/client";
 export async function middleware(request: NextRequest) {
   // Get the pathname from the URL
   const pathname = request.nextUrl.pathname;
+  const isApiRoute = pathname.startsWith("/api/");
 
   // Public routes that don't require authentication
-  const publicRoutes = ["/", "/signin", "/signup", "/api/auth"];
-  if (publicRoutes.some(route => pathname === route || pathname.startsWith(route + "/"))) {
+  const publicRoutes = [
+    "/", 
+    "/signin", 
+    "/signup", 
+    "/api/auth",
+    "/configs", // Allow public access to configs listing
+    "/api/configs", // Allow public access to configs API
+  ];
+  
+  // Check if the path is a public route or a specific config view
+  if (
+    publicRoutes.some(route => pathname === route || pathname.startsWith(route + "/")) ||
+    pathname.match(/^\/configs\/[^\/]+$/) || // Allow access to individual config pages
+    pathname.match(/^\/api\/configs\/[^\/]+$/) // Allow access to individual config API endpoints (GET only)
+  ) {
+    // For API config endpoints, only allow GET requests without authentication
+    if (pathname.startsWith("/api/configs/") && request.method !== "GET") {
+      // For non-GET methods on config endpoints, check authentication
+      const sessionCookie = getSessionCookie(request);
+      if (!sessionCookie) {
+        // Return JSON response for API routes instead of redirecting
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 }
+        );
+      }
+    }
+    
     return NextResponse.next();
   }
 
   // Check for session cookie (lightweight check without database query)
   const sessionCookie = getSessionCookie(request);
   
-  // If no session cookie exists, redirect to sign in
+  // If no session cookie exists, handle differently based on route type
   if (!sessionCookie) {
+    // For API routes, return a JSON response instead of redirecting
+    if (isApiRoute) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+    // For page routes, redirect to sign in
     return NextResponse.redirect(new URL("/signin", request.url));
   }
 
@@ -41,6 +76,12 @@ export async function middleware(request: NextRequest) {
       });
       
       if (!sessionResponse.ok) {
+        if (isApiRoute) {
+          return NextResponse.json(
+            { error: "Authentication failed" },
+            { status: 401 }
+          );
+        }
         return NextResponse.redirect(new URL("/signin", request.url));
       }
       
@@ -48,6 +89,12 @@ export async function middleware(request: NextRequest) {
       
       // Check if user has admin role
       if (!sessionData.user || sessionData.user.role !== Role.ADMIN) {
+        if (isApiRoute) {
+          return NextResponse.json(
+            { error: "Admin access required" },
+            { status: 403 }
+          );
+        }
         return NextResponse.redirect(new URL("/", request.url));
       }
       
@@ -55,10 +102,22 @@ export async function middleware(request: NextRequest) {
       if (sessionData.user && 'suspendedUntil' in sessionData.user && 
           sessionData.user.suspendedUntil && 
           new Date(sessionData.user.suspendedUntil) > new Date()) {
+        if (isApiRoute) {
+          return NextResponse.json(
+            { error: "Account suspended" },
+            { status: 403 }
+          );
+        }
         return NextResponse.redirect(new URL("/suspended", request.url));
       }
     } catch (error) {
       console.error("Admin role verification error:", error);
+      if (isApiRoute) {
+        return NextResponse.json(
+          { error: "Authentication error" },
+          { status: 500 }
+        );
+      }
       return NextResponse.redirect(new URL("/signin", request.url));
     }
   }
