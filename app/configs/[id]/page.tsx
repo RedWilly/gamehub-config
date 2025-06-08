@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSession } from "@/lib/auth-client";
+import { VoteButtons } from "@/components/configs/VoteButtons";
 
 interface ConfigDetailsPageProps {
   params: {
@@ -41,6 +42,7 @@ export default function ConfigDetailsPage({ params }: ConfigDetailsPageProps): J
   const [configData, setConfigData] = useState<any>(null);
   const [gameData, setGameData] = useState<any>(null);
   const [isReverting, setIsReverting] = useState<boolean>(false);
+  const [userVote, setUserVote] = useState<number | null>(null);
   
   const router = useRouter();
   const { id } = params;
@@ -75,6 +77,20 @@ export default function ConfigDetailsPage({ params }: ConfigDetailsPageProps): J
 
         const gameData = await gameResponse.json();
         setGameData(gameData);
+
+        // If user is logged in, fetch their vote for this config
+        if (session?.user) {
+          try {
+            const voteResponse = await fetch(`/api/configs/${id}/vote/user`);
+            if (voteResponse.ok) {
+              const voteData = await voteResponse.json();
+              setUserVote(voteData.vote?.value || null);
+            }
+          } catch (voteError) {
+            console.error("Error fetching user vote:", voteError);
+            // Don't set an error state, just continue without the user's vote
+          }
+        }
       } catch (err: any) {
         console.error("Error fetching data:", err);
         setError(err.message || "Failed to load configuration data");
@@ -84,7 +100,7 @@ export default function ConfigDetailsPage({ params }: ConfigDetailsPageProps): J
     };
 
     fetchData();
-  }, [id]);
+  }, [id, session]);
 
   // Check if the current user is the author of the config
   const isAuthor = session?.user?.id === configData?.userId;
@@ -176,70 +192,75 @@ export default function ConfigDetailsPage({ params }: ConfigDetailsPageProps): J
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center">
+                <div className="flex items-center justify-center h-full bg-muted">
                   <p className="text-muted-foreground">No image</p>
                 </div>
               )}
             </div>
           </div>
           
-          {/* Config Details */}
+          {/* Config Info */}
           <div className="w-full md:w-3/4">
             <div className="flex flex-col h-full">
               <div>
-                <h1 className="text-3xl font-bold">{gameData.name}</h1>
-                <p className="text-xl text-muted-foreground mt-1">
-                  {configData.title || "Configuration"}
-                </p>
-                
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {configData.tags?.map((tag: string, index: number) => (
-                    <Badge key={index} variant="secondary">
-                      <Tag className="h-3 w-3 mr-1" />
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-                
-                <div className="flex items-center gap-4 mt-6">
-                  <div className="flex items-center gap-1">
-                    <ThumbsUp className="h-4 w-4 text-green-500" />
-                    <span>{configData.upvotes || 0}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <ThumbsDown className="h-4 w-4 text-red-500" />
-                    <span>{configData.downvotes || 0}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{new Date(configData.createdAt).toLocaleDateString()}</span>
-                  </div>
-                </div>
+                <h1 className="text-3xl font-bold tracking-tight">{gameData.name}</h1>
+                <p className="text-muted-foreground">Steam ID: {gameData.steamId}</p>
               </div>
               
-              <div className="mt-auto pt-6">
-                <div className="flex flex-wrap gap-3">
-                  <Button>
-                    <Download className="mr-2 h-4 w-4" />
-                    Download Config
-                  </Button>
-                  
-                  {isAuthor && (
-                    <Button variant="outline" onClick={() => router.push(`/configs/edit/${id}`)}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      Edit Config
-                    </Button>
-                  )}
-                  
-                  <Button variant="secondary" onClick={() => router.push(`/games/${gameData.id}`)}>
-                    View Game
-                  </Button>
-                </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {configData.tags && configData.tags.map((tag: string) => (
+                  <Badge key={tag} variant="secondary">
+                    <Tag className="h-3 w-3 mr-1" />
+                    {tag}
+                  </Badge>
+                ))}
               </div>
+              
+              <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+                <p>Created by @{configData.createdBy?.username || "unknown"}</p>
+                <span>•</span>
+                <p>GameHub v{configData.gamehubVersion}</p>
+                <span>•</span>
+                <p>{format(new Date(configData.createdAt), "PPP")}</p>
+              </div>
+              
+              <div className="mt-4 flex flex-wrap items-center gap-4">
+                {/* Voting Buttons */}
+                <VoteButtons
+                  configId={id}
+                  initialUpvotes={configData.upvotes}
+                  initialDownvotes={configData.downvotes}
+                  initialUserVote={userVote}
+                />
+                
+                {/* Edit Button (only for author) */}
+                {isAuthor && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                  >
+                    <Link href={`/configs/edit/${id}`}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Link>
+                  </Button>
+                )}
+              </div>
+              
+              {/* Legacy Config Badge */}
+              {configData.isLegacy && (
+                <div className="mt-4">
+                  <Badge variant="destructive">Legacy Config</Badge>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    This configuration has been replaced by a newer community-approved version.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
-        
+
         {/* Config Content Tabs */}
         <Tabs defaultValue="details" className="mt-8">
           <TabsList className="grid w-full grid-cols-3">

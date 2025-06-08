@@ -30,8 +30,8 @@ export const auth = betterAuth({
                 moderator: moderatorRole,
                 user: userRole
             },
-            defaultRole: "user",
-            adminRoles: ["admin"],
+            defaultRole: "USER",
+            adminRoles: ["ADMIN"],
         }),
         customSession(async ({ user, session }) => {
             // Get the full user data including suspendedUntil and role field

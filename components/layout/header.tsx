@@ -1,7 +1,7 @@
 "use client"
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { TowerControl, User } from 'lucide-react';
+import { TowerControl } from 'lucide-react';
 import { useSession, signOut } from '@/lib/auth-client';
 import {
   DropdownMenu,
@@ -12,6 +12,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+// Define extended user type to include the properties we need
+interface ExtendedUser {
+  suspendedUntil: Date | null;
+  role: string | undefined;
+  id: string;
+  name: string;
+  email: string;
+  emailVerified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  image?: string | null;
+  username?: string;
+  displayUsername?: string;
+}
 
 export function Header() {
   const { data: session, isPending } = useSession();
@@ -24,13 +39,15 @@ export function Header() {
   const getUserInitials = (): string => {
     if (!session?.user) return 'U';
     
-    const displayName = session.user.displayUsername || session.user.username || session.user.name;
+    // Cast the user to our extended type
+    const user = session.user as ExtendedUser;
+    const displayName = user.displayUsername || user.username || user.name;
     
     if (!displayName) return 'U';
     
     return displayName
       .split(' ')
-      .map(part => part[0])
+      .map((part: string) => part[0])
       .join('')
       .toUpperCase()
       .substring(0, 2);
@@ -62,7 +79,12 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={session?.user?.image || ''} alt={session?.user?.displayUsername || session?.user?.username || 'User'} />
+                      <AvatarImage 
+                        src={session?.user?.image || ''} 
+                        alt={(session?.user as ExtendedUser)?.displayUsername || 
+                             (session?.user as ExtendedUser)?.username || 
+                             'User'} 
+                      />
                       <AvatarFallback>{getUserInitials()}</AvatarFallback>
                     </Avatar>
                   </Button>
@@ -71,7 +93,9 @@ export function Header() {
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">
-                        {session?.user?.displayUsername || session?.user?.username}
+                        {(session?.user as ExtendedUser)?.displayUsername || 
+                         (session?.user as ExtendedUser)?.username || 
+                         session?.user?.name}
                       </p>
                     </div>
                   </DropdownMenuLabel>
