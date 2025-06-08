@@ -9,7 +9,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Loader2, Edit, ThumbsUp, ThumbsDown, Clock, Tag, Download } from "lucide-react";
+import { Loader2, Edit, ThumbsUp, ThumbsDown, Clock, Tag, Download, History, RotateCcw } from "lucide-react";
+import { format } from "date-fns";
+import { toast } from "sonner";
 
 import { Container } from "@/components/ui/container";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -19,7 +21,6 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSession } from "@/lib/auth-client";
-
 
 interface ConfigDetailsPageProps {
   params: {
@@ -39,6 +40,7 @@ export default function ConfigDetailsPage({ params }: ConfigDetailsPageProps): J
   const [error, setError] = useState<string | null>(null);
   const [configData, setConfigData] = useState<any>(null);
   const [gameData, setGameData] = useState<any>(null);
+  const [isReverting, setIsReverting] = useState<boolean>(false);
   
   const router = useRouter();
   const { id } = params;
@@ -86,6 +88,49 @@ export default function ConfigDetailsPage({ params }: ConfigDetailsPageProps): J
 
   // Check if the current user is the author of the config
   const isAuthor = session?.user?.id === configData?.userId;
+  
+  // Check if user has permission to revert versions (admin, mod, or author)
+  const canRevertVersions = 
+    session?.user?.role === "ADMIN" || 
+    session?.user?.role === "MODERATOR" || 
+    isAuthor;
+
+  /**
+   * Revert to a previous version of the configuration
+   * 
+   * @param versionId - ID of the version to revert to
+   */
+  const revertToVersion = async (versionId: string): Promise<void> => {
+    if (!canRevertVersions) return;
+    
+    setIsReverting(true);
+    
+    try {
+      const response = await fetch(`/api/configs/${id}/versions/${versionId}/revert`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to revert to previous version");
+      }
+      
+      // Refresh the page to show the reverted version
+      toast.success("Successfully reverted to previous version");
+      router.refresh();
+      
+      // Reload the data
+      window.location.reload();
+    } catch (error: any) {
+      console.error("Error reverting version:", error);
+      toast.error(error.message || "Failed to revert to previous version");
+    } finally {
+      setIsReverting(false);
+    }
+  };
 
   // Show loading state
   if (isLoading) {
@@ -201,6 +246,10 @@ export default function ConfigDetailsPage({ params }: ConfigDetailsPageProps): J
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="compatibility">Compatibility</TabsTrigger>
             <TabsTrigger value="components">Components</TabsTrigger>
+            <TabsTrigger value="versions" className="flex items-center gap-2">
+              <History className="h-4 w-4" />
+              <span>Versions</span>
+            </TabsTrigger>
           </TabsList>
           
           {/* Details Tab */}
@@ -337,6 +386,83 @@ export default function ConfigDetailsPage({ params }: ConfigDetailsPageProps): J
                   </ul>
                 ) : (
                   <p className="text-muted-foreground">No additional components specified</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* Versions Tab */}
+          <TabsContent value="versions" className="mt-6">
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold">Version History</h3>
+                <p className="text-sm text-muted-foreground">
+                  View and manage previous versions of this configuration
+                </p>
+              </CardHeader>
+              <CardContent>
+                {configData.versions && configData.versions.length > 0 ? (
+                  <div className="space-y-4">
+                    {configData.versions.map((version: any, index: number) => (
+                      <div 
+                        key={version.id} 
+                        className={`p-4 rounded-lg border ${index === 0 ? 'bg-muted/50' : ''}`}
+                      >
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={index === 0 ? "default" : "outline"}>
+                                v{version.versionNumber}
+                              </Badge>
+                              {index === 0 && (
+                                <Badge variant="secondary">Current</Badge>
+                              )}
+                            </div>
+                            
+                            <div className="mt-2 text-sm">
+                              <span className="text-muted-foreground">
+                                {version.createdAt ? (
+                                  <>
+                                    {index === 0 ? 'Updated' : 'Created'} {format(new Date(version.createdAt), 'PPP')}
+                                  </>
+                                ) : 'Date unknown'}
+                              </span>
+                              
+                              {version.updatedBy && (
+                                <span className="ml-1 text-muted-foreground">
+                                  by @{version.updatedBy.username || 'unknown'}
+                                </span>
+                              )}
+                            </div>
+                            
+                            {version.changeSummary && (
+                              <p className="mt-1 text-sm">{version.changeSummary}</p>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center gap-2 mt-2 md:mt-0">
+                            {index !== 0 && canRevertVersions && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => revertToVersion(version.id)}
+                                disabled={isReverting}
+                              >
+                                {isReverting ? (
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                ) : (
+                                  <RotateCcw className="h-4 w-4 mr-2" />
+                                )}
+                                Revert to this version
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">No version history available</p>
                 )}
               </CardContent>
             </Card>

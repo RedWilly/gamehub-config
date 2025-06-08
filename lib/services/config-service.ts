@@ -137,10 +137,13 @@ export async function createConfig(data: CreateConfigData) {
  */
 export async function getConfig(idOrSlug: string) {
   try {
+    // Check if it's a UUID (standard format with hyphens) or CUID format
     const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(idOrSlug);
+    const isCuid = /^c[a-z0-9]{24}$/.test(idOrSlug);
     
+    // Use ID directly without fallback to slug
     const config = await prisma.config.findUnique({
-      where: isUuid ? { id: idOrSlug } : { slug: idOrSlug },
+      where: { id: idOrSlug },
       include: {
         game: true,
         createdBy: {
@@ -399,5 +402,109 @@ export async function updateConfig(
   } catch (error) {
     console.error('Error updating config:', error);
     throw error;
+  }
+}
+
+/**
+ * Reverts a configuration to a previous version
+ * 
+ * @param configId - ID of the configuration to revert
+ * @param versionId - ID of the version to revert to
+ * @param userId - ID of the user performing the revert
+ * @returns The reverted configuration or null if revert failed
+ */
+export async function revertConfigToVersion(
+  configId: string,
+  versionId: string,
+  userId: string
+) {
+  try {
+    // Get the version to revert to
+    const versionToRevert = await prisma.configVersion.findUnique({
+      where: { id: versionId },
+      include: {
+        config: {
+          include: { details: true }
+        }
+      }
+    });
+
+    if (!versionToRevert) {
+      throw new Error('Version not found');
+    }
+
+    // Extract the configuration snapshot from the version
+    const configSnapshot = versionToRevert.configSnapshot as any;
+    
+    if (!configSnapshot) {
+      throw new Error('Version snapshot is missing');
+    }
+
+    // Update the config with the snapshot data in a transaction
+    const revertedConfig = await prisma.$transaction(async (tx) => {
+      // Update config details with snapshot data
+      await tx.configDetails.update({
+        where: { configId },
+        data: {
+          language: configSnapshot.language,
+          gameResolution: configSnapshot.gameResolution || '',
+          directxHub: configSnapshot.directxHub || 'DISABLE',
+          envVars: configSnapshot.envVars,
+          commandLine: configSnapshot.commandLine,
+          compatLayer: configSnapshot.compatLayer || '',
+          gpuDriver: configSnapshot.gpuDriver || '',
+          audioDriver: configSnapshot.audioDriver || 'ALSA',
+          dxvkVersion: configSnapshot.dxvkVersion || '',
+          vkd3dVersion: configSnapshot.vkd3dVersion || '',
+          cpuTranslator: configSnapshot.cpuTranslator || '',
+          cpuCoreLimit: configSnapshot.cpuCoreLimit || '',
+          vramLimit: configSnapshot.vramLimit || '',
+          components: configSnapshot.components || []
+        }
+      });
+
+      // Get the latest version number
+      const latestVersion = await tx.configVersion.findFirst({
+        where: { configId },
+        orderBy: { versionNumber: 'desc' }
+      });
+
+      const newVersionNumber = latestVersion ? latestVersion.versionNumber + 1 : 1;
+
+      // Create a new version to record this revert action
+      await tx.configVersion.create({
+        data: {
+          configId,
+          userId,
+          versionNumber: newVersionNumber,
+          configSnapshot: configSnapshot as Prisma.JsonObject,
+          changeSummary: `Reverted to version ${versionToRevert.versionNumber}`
+        }
+      });
+
+      // Return the updated config
+      return tx.config.findUnique({
+        where: { id: configId },
+        include: {
+          details: true,
+          versions: {
+            orderBy: { versionNumber: 'desc' },
+            take: 1,
+            include: {
+              updatedBy: {
+                select: {
+                  username: true
+                }
+              }
+            }
+          }
+        }
+      });
+    });
+
+    return revertedConfig;
+  } catch (error) {
+    console.error('Error reverting config version:', error);
+    return null;
   }
 }

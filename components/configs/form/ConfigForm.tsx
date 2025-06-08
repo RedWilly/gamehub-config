@@ -118,7 +118,12 @@ export function ConfigForm({
     try {
       // Prepare request URL and method based on whether we're creating or editing
       const url = isEditing ? `/api/configs/${configId}` : "/api/configs";
-      const method = isEditing ? "PUT" : "POST";
+      const method = isEditing ? "PATCH" : "POST";
+
+      // Add changeSummary field if editing
+      const requestData = isEditing 
+        ? { ...values, changeSummary: "Updated configuration" } 
+        : values;
 
       // Send request to API
       const response = await fetch(url, {
@@ -126,7 +131,7 @@ export function ConfigForm({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(requestData),
       });
 
       if (!response.ok) {
