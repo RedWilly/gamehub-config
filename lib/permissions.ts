@@ -92,6 +92,13 @@ export const userRole = ac.newRole({
     version: ["create", "read"] // Can create versions of own configs
 });
 
+// Public role for unauthenticated users - can only read non-hidden configs
+export const publicRole = ac.newRole({
+    // Only allow reading configs and games
+    config: ["read"],
+    game: ["read"]
+});
+
 // Additional helper functions for permission checking
 export const canModerateUser = (userRole: string, targetRole: string): boolean => {
     // Admins can moderate anyone except other admins
@@ -142,6 +149,31 @@ export const canDeleteContent = (userRole: string, contentOwnerId: string, curre
     // Users can delete their own content
     if (userRole === 'USER') {
         return contentOwnerId === currentUserId;
+    }
+    
+    return false;
+};
+
+// New helper function to check if a config can be read by anyone
+export const canReadConfig = (userRole: string | null, isHidden: boolean, contentOwnerId?: string, currentUserId?: string): boolean => {
+    // If config is not hidden, anyone can read it (including public/unauthenticated users)
+    if (!isHidden) {
+        return true;
+    }
+    
+    // Hidden configs require authentication and specific permissions
+    if (!userRole || !currentUserId) {
+        return false;
+    }
+    
+    // Admins and moderators can view any hidden config
+    if (userRole === 'ADMIN' || userRole === 'MODERATOR') {
+        return true;
+    }
+    
+    // Users can only view their own hidden configs
+    if (userRole === 'USER' && contentOwnerId === currentUserId) {
+        return true;
     }
     
     return false;

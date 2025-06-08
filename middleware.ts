@@ -24,17 +24,21 @@ export async function middleware(request: NextRequest) {
     "/api/auth",
     "/configs", // Allow public access to configs listing
     "/api/configs", // Allow public access to configs API
+    "/games", // Allow public access to games listing
+    "/api/games", // Allow public access to games API
   ];
   
-  // Check if the path is a public route or a specific config view
+  // Check if the path is a public route or a specific config/game view
   if (
     publicRoutes.some(route => pathname === route || pathname.startsWith(route + "/")) ||
     pathname.match(/^\/configs\/[^\/]+$/) || // Allow access to individual config pages
-    pathname.match(/^\/api\/configs\/[^\/]+$/) // Allow access to individual config API endpoints (GET only)
+    pathname.match(/^\/api\/configs\/[^\/]+$/) || // Allow access to individual config API endpoints (GET only)
+    pathname.match(/^\/games\/[^\/]+$/) || // Allow access to individual game pages
+    pathname.match(/^\/api\/games\/[^\/]+$/) // Allow access to individual game API endpoints (GET only)
   ) {
-    // For API config endpoints, only allow GET requests without authentication
-    if (pathname.startsWith("/api/configs/") && request.method !== "GET") {
-      // For non-GET methods on config endpoints, check authentication
+    // For API config/game endpoints, only allow GET requests without authentication
+    if ((pathname.startsWith("/api/configs/") || pathname.startsWith("/api/games/")) && request.method !== "GET") {
+      // For non-GET methods on config/game endpoints, check authentication
       const sessionCookie = getSessionCookie(request);
       if (!sessionCookie) {
         // Return JSON response for API routes instead of redirecting

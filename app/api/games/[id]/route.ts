@@ -17,6 +17,7 @@ interface RouteParams {
 /**
  * GET /api/games/[id]
  * Get a specific game by ID
+ * Public access allowed - no authentication required
  */
 export async function GET(
   request: NextRequest,

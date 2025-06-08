@@ -5,7 +5,7 @@ import {
 } from "better-auth/react";
 import { usernameClient, adminClient, customSessionClient } from "better-auth/client/plugins";
 import { useState, useEffect } from 'react';
-import { ac, adminRole, moderatorRole, userRole } from "./permissions";
+import { ac, adminRole, moderatorRole, userRole, publicRole } from "./permissions";
 import type { auth } from "./auth"; // Import the auth instance as a type
 
 /**
@@ -20,8 +20,10 @@ export const authClient = createAuthClient({
             roles: {
                 admin: adminRole,
                 moderator: moderatorRole,
-                user: userRole
-            }
+                user: userRole,
+                public: publicRole // Add public role for unauthenticated users
+            },
+            publicRole: "public" // Define which role to use for unauthenticated requests
         }),
         customSessionClient<typeof auth>() // Add custom session client plugin to handle suspendedUntil field
     ] 

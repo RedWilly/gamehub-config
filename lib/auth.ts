@@ -3,7 +3,7 @@ import {
 } from 'better-auth';
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { username, admin, customSession } from "better-auth/plugins";
-import { ac, adminRole, moderatorRole, userRole } from "./permissions";
+import { ac, adminRole, moderatorRole, userRole, publicRole } from "./permissions";
 import { prisma } from "./prisma";
 
 // Create and export auth instance
@@ -28,10 +28,12 @@ export const auth = betterAuth({
             roles: {
                 admin: adminRole,
                 moderator: moderatorRole,
-                user: userRole
+                user: userRole,
+                public: publicRole 
             },
             defaultRole: "USER",
             adminRoles: ["ADMIN"],
+            publicRole: "public" 
         }),
         customSession(async ({ user, session }) => {
             // Get the full user data including suspendedUntil and role field

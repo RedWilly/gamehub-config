@@ -9,7 +9,7 @@ import { getConfig, updateConfig } from "@/lib/services/config-service";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { DirectXHubType, AudioDriverType, Role } from "@prisma/client";
-import { canEditContent, canDeleteContent } from "@/lib/permissions";
+import { canEditContent, canDeleteContent, canReadConfig } from "@/lib/permissions";
 
 // Schema for config update validation
 const updateConfigSchema = z.object({
@@ -40,6 +40,7 @@ const updateConfigSchema = z.object({
 /**
  * GET /api/configs/[id]
  * Get a specific configuration by ID or slug
+ * Public access allowed for non-hidden configs
  */
 export async function GET(
   request: NextRequest,
@@ -55,25 +56,25 @@ export async function GET(
       );
     }
 
-    // Check if config is hidden and if user has permission to view it
+    // Check if config is hidden
     if (config.isHidden) {
+      // For hidden configs, check authentication and permissions
       const session = await auth.api.getSession({
         headers: request.headers,
       });
 
-      // Only admins, moderators, or the config creator can view hidden configs
-      if (
-        !session ||
-        (session.user.id !== config.userId &&
-          session.user.role !== Role.ADMIN &&
-          session.user.role !== Role.MODERATOR)
-      ) {
+      // Use the canReadConfig helper to determine access
+      const userRole = session?.user?.role as Role | null;
+      const userId = session?.user?.id;
+      
+      if (!canReadConfig(userRole, config.isHidden, config.userId, userId)) {
         return NextResponse.json(
           { error: "Configuration not found" },
           { status: 404 }
         );
       }
     }
+    // Non-hidden configs can be viewed by anyone (including unauthenticated users)
 
     return NextResponse.json(config);
   } catch (error) {

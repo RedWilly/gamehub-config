@@ -36,6 +36,7 @@ const configSchema = z.object({
 /**
  * GET /api/configs
  * Get configurations with optional filters
+ * Public access allowed for game-specific configs
  */
 export async function GET(request: NextRequest) {
   try {
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
     const gameId = searchParams.get("gameId");
     const userId = searchParams.get("userId");
     
-    // Validate authentication for user-specific queries
+    // For user-specific queries, still require authentication
     if (userId) {
       const session = await auth.api.getSession({
         headers: request.headers,
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(result);
     }
     
-    // If gameId is provided, get configs for that game
+    // If gameId is provided, get configs for that game - public access allowed
     if (gameId) {
       const result = await getConfigsByGame(gameId, page, limit);
       return NextResponse.json(result);
