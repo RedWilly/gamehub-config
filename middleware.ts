@@ -22,6 +22,8 @@ export async function middleware(request: NextRequest) {
     "/signin", 
     "/signup", 
     "/api/auth",
+    "/users", // Allow public access to users listing
+    "/api/users", // Allow public access to users API
     "/configs", // Allow public access to configs listing
     "/api/configs", // Allow public access to configs API
     "/games", // Allow public access to games listing
