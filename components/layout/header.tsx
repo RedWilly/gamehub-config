@@ -30,7 +30,9 @@ interface ExtendedUser {
 
 export function Header() {
   const { data: session, isPending } = useSession();
-  const isAuthenticated = !isPending && session?.user !== null;
+  
+  // Only consider authenticated if session exists and has a user
+  const isAuthenticated = Boolean(session?.user);
   
   /**
    * Gets the user's initials from their display name or username
@@ -101,7 +103,7 @@ export function Header() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/profile">Profile</Link>
+                    <Link href={`/users/${(session?.user as ExtendedUser)?.username}`}>Profile</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/dashboard">Dashboard</Link>
