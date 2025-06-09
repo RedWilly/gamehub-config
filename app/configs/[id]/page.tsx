@@ -62,10 +62,10 @@ export async function generateMetadata(
     
     // Construct metadata
     return {
-      title: `${config.game.name} Configuration by ${config.createdBy.username} | GameHub Config Directory`,
+      title: `${config.game.name} GameHub Config by ${config.createdBy.username} | GameHub Config Directory`,
       description: `Optimized GameHub configuration for ${config.game.name}. GameHub version: ${config.gamehubVersion}`,
       openGraph: {
-        title: `${config.game.name} Configuration | GameHub Config Directory`,
+        title: `${config.game.name} GameHub Config by ${config.createdBy.username} | GameHub Config Directory`,
         description: `Optimized GameHub configuration for ${config.game.name}. GameHub version: ${config.gamehubVersion}`,
         images: [config.game.imageUrl],
         type: "article",
@@ -97,7 +97,7 @@ export async function generateMetadata(
   } catch (error) {
     console.error("Error generating metadata:", error);
     return {
-      title: "Game Configuration | GameHub Config Directory",
+      title: "GameHub Config | GameHub Config Directory",
       description: "View optimized game configurations for GameHub emulator",
     };
   }
