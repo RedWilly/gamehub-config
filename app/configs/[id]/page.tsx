@@ -1,28 +1,31 @@
 /**
  * Config Details Page
  * Page for viewing a specific game configuration
+ * This is a server component that fetches data server-side for better SEO
  */
 
-"use client";
-
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Loader2, Edit, ThumbsUp, ThumbsDown, Clock, Tag, Download, History, RotateCcw, MessageSquare } from "lucide-react";
+import { Loader2, Edit, Tag, History, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
-import { toast } from "sonner";
+import { Metadata, ResolvingMetadata } from "next";
+import { headers } from "next/headers";
 
 import { Container } from "@/components/ui/container";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSession } from "@/lib/auth-client";
-import { VoteButtons } from "@/components/configs/VoteButtons";
-import { CommentList } from "@/components/comments/comment-list";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { VoteButtonsServer } from "@/components/configs/VoteButtonsServer";
+import { CommentListServer } from "@/components/comments/comment-list-server";
+import { ConfigVersionControls } from "@/components/configs/config-version-controls";
+
+// Types for our data
+type ConfigData = any; // Replace with proper type from your schema
+type GameData = any; // Replace with proper type from your schema
 
 interface ConfigDetailsPageProps {
   params: {
@@ -31,78 +34,145 @@ interface ConfigDetailsPageProps {
 }
 
 /**
+ * Generate metadata for the page based on the config data
+ * This improves SEO by providing accurate page titles, descriptions, and OpenGraph data
+ */
+export async function generateMetadata(
+  { params }: ConfigDetailsPageProps,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const id = params.id;
+  
+  try {
+    // Fetch config data
+    const config = await prisma.config.findUnique({
+      where: { id },
+      include: {
+        game: true,
+        createdBy: true,
+      },
+    });
+    
+    if (!config) {
+      return {
+        title: "Configuration Not Found",
+        description: "The requested game configuration could not be found.",
+      };
+    }
+    
+    // Construct metadata
+    return {
+      title: `${config.game.name} Configuration by ${config.createdBy.username} | GameHub Config Directory`,
+      description: `Optimized GameHub configuration for ${config.game.name}. GameHub version: ${config.gamehubVersion}`,
+      openGraph: {
+        title: `${config.game.name} Configuration | GameHub Config Directory`,
+        description: `Optimized GameHub configuration for ${config.game.name}. GameHub version: ${config.gamehubVersion}`,
+        images: [config.game.imageUrl],
+        type: "article",
+      },
+      // Add structured data for search engines
+      other: {
+        "script:ld+json": JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": `GameHub Config for ${config.game.name}`,
+          "applicationCategory": "Game",
+          "operatingSystem": "Android",
+          "author": {
+            "@type": "Person",
+            "name": config.createdBy.username
+          },
+          "datePublished": config.createdAt,
+          "dateModified": config.updatedAt,
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": config.upvotes > 0 ? (config.upvotes / (config.upvotes + config.downvotes)) * 5 : 0,
+            "ratingCount": config.upvotes + config.downvotes,
+            "bestRating": "5",
+            "worstRating": "1"
+          }
+        })
+      }
+    };
+  } catch (error) {
+    console.error("Error generating metadata:", error);
+    return {
+      title: "Game Configuration | GameHub Config Directory",
+      description: "View optimized game configurations for GameHub emulator",
+    };
+  }
+}
+
+/**
  * ConfigDetailsPage component for viewing a specific game configuration
- * Fetches config data based on the id parameter
+ * Server component that fetches data server-side for better SEO
  * 
  * @param props - Component props containing route parameters
  * @returns React component
  */
-export default function ConfigDetailsPage({ params }: ConfigDetailsPageProps): JSX.Element {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [configData, setConfigData] = useState<any>(null);
-  const [gameData, setGameData] = useState<any>(null);
-  const [isReverting, setIsReverting] = useState<boolean>(false);
-  const [userVote, setUserVote] = useState<number | null>(null);
-  
-  const router = useRouter();
+export default async function ConfigDetailsPage({ params }: ConfigDetailsPageProps): Promise<JSX.Element> {
   const { id } = params;
-  const { data: session } = useSession();
-
-  // Fetch config and game data when the component mounts
-  useEffect(() => {
-    const fetchData = async (): Promise<void> => {
-      if (!id) {
-        setError("No config ID provided");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        // Fetch config data
-        const configResponse = await fetch(`/api/configs/${id}`);
-        
-        if (!configResponse.ok) {
-          throw new Error("Failed to fetch configuration data");
-        }
-
-        const configData = await configResponse.json();
-        setConfigData(configData);
-
-        // Fetch game data
-        const gameResponse = await fetch(`/api/games/${configData.gameId}`);
-        
-        if (!gameResponse.ok) {
-          throw new Error("Failed to fetch game data");
-        }
-
-        const gameData = await gameResponse.json();
-        setGameData(gameData);
-
-        // If user is logged in, fetch their vote for this config
-        if (session?.user) {
-          try {
-            const voteResponse = await fetch(`/api/configs/${id}/vote/user`);
-            if (voteResponse.ok) {
-              const voteData = await voteResponse.json();
-              setUserVote(voteData.vote?.value || null);
-            }
-          } catch (voteError) {
-            console.error("Error fetching user vote:", voteError);
-            // Don't set an error state, just continue without the user's vote
-          }
-        }
-      } catch (err: any) {
-        console.error("Error fetching data:", err);
-        setError(err.message || "Failed to load configuration data");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [id, session]);
-
+  
+  // Get current session
+  const session = await auth.api.getSession({
+    headers: headers()
+  });
+  
+  // Fetch data server-side
+  let configData: ConfigData | null = null;
+  let gameData: GameData | null = null;
+  let error: string | null = null;
+  let userVote: number | null = null;
+  
+  try {
+    // Fetch config with details, versions, and creator info
+    configData = await prisma.config.findUnique({
+      where: { id },
+      include: {
+        details: true,
+        createdBy: true,
+        versions: {
+          include: {
+            updatedBy: true,
+          },
+          orderBy: {
+            versionNumber: 'desc',
+          },
+        },
+      },
+    });
+    
+    if (!configData) {
+      throw new Error("Configuration not found");
+    }
+    
+    // Fetch game data
+    gameData = await prisma.game.findUnique({
+      where: { id: configData.gameId },
+    });
+    
+    if (!gameData) {
+      throw new Error("Game data not found");
+    }
+    
+    // If user is logged in, fetch their vote for this config
+    if (session?.user) {
+      const vote = await prisma.vote.findUnique({
+        where: {
+          userId_configId: {
+            userId: session.user.id,
+            configId: id,
+          },
+        },
+      });
+      
+      userVote = vote?.value || null;
+    }
+  } catch (err: any) {
+    console.error("Error fetching data:", err);
+    error = err.message || "Failed to load configuration data";
+  }
+  
   // Check if the current user is the author of the config
   const isAuthor = session?.user?.id === configData?.userId;
   
@@ -111,55 +181,6 @@ export default function ConfigDetailsPage({ params }: ConfigDetailsPageProps): J
     session?.user?.role === "ADMIN" || 
     session?.user?.role === "MODERATOR" || 
     isAuthor;
-
-  /**
-   * Revert to a previous version of the configuration
-   * 
-   * @param versionId - ID of the version to revert to
-   */
-  const revertToVersion = async (versionId: string): Promise<void> => {
-    if (!canRevertVersions) return;
-    
-    setIsReverting(true);
-    
-    try {
-      const response = await fetch(`/api/configs/${id}/versions/${versionId}/revert`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to revert to previous version");
-      }
-      
-      // Refresh the page to show the reverted version
-      toast.success("Successfully reverted to previous version");
-      router.refresh();
-      
-      // Reload the data
-      window.location.reload();
-    } catch (error: any) {
-      console.error("Error reverting version:", error);
-      toast.error(error.message || "Failed to revert to previous version");
-    } finally {
-      setIsReverting(false);
-    }
-  };
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <Container>
-        <div className="py-20 flex flex-col items-center justify-center">
-          <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-          <p className="text-muted-foreground">Loading configuration data...</p>
-        </div>
-      </Container>
-    );
-  }
 
   // Show error if data couldn't be loaded
   if (error || !configData || !gameData) {
@@ -191,6 +212,7 @@ export default function ConfigDetailsPage({ params }: ConfigDetailsPageProps): J
                   alt={gameData.name}
                   fill
                   className="object-cover"
+                  priority
                 />
               ) : (
                 <div className="flex items-center justify-center h-full bg-muted">
@@ -227,11 +249,12 @@ export default function ConfigDetailsPage({ params }: ConfigDetailsPageProps): J
               
               <div className="mt-4 flex flex-wrap items-center gap-4">
                 {/* Voting Buttons */}
-                <VoteButtons
+                <VoteButtonsServer
                   configId={id}
                   initialUpvotes={configData.upvotes}
                   initialDownvotes={configData.downvotes}
                   initialUserVote={userVote}
+                  userId={session?.user?.id}
                 />
                 
                 {/* Edit Button (only for author) */}
@@ -468,19 +491,11 @@ export default function ConfigDetailsPage({ params }: ConfigDetailsPageProps): J
                           
                           <div className="flex items-center gap-2 mt-2 md:mt-0">
                             {index !== 0 && canRevertVersions && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => revertToVersion(version.id)}
-                                disabled={isReverting}
-                              >
-                                {isReverting ? (
-                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                ) : (
-                                  <RotateCcw className="h-4 w-4 mr-2" />
-                                )}
-                                Revert to this version
-                              </Button>
+                              <ConfigVersionControls
+                                versionId={version.id}
+                                configId={id}
+                                isReverting={false}
+                              />
                             )}
                           </div>
                         </div>
@@ -504,7 +519,7 @@ export default function ConfigDetailsPage({ params }: ConfigDetailsPageProps): J
                 </p>
               </CardHeader>
               <CardContent>
-                <CommentList configId={id} />
+                <CommentListServer configId={id} />
               </CardContent>
             </Card>
           </TabsContent>

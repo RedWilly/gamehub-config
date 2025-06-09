@@ -1,53 +1,39 @@
+/**
+ * Client-side comment form component
+ * Handles adding new comments to a config
+ */
+
 "use client";
 
 import { useState } from "react";
-import { useSession } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
 
-/**
- * Props for the CommentForm component
- */
 interface CommentFormProps {
   configId: string;
-  onCommentAdded?: (comment: any) => void;
+  userId: string;
 }
 
 /**
- * CommentForm component for submitting new comments on a config
- * 
- * @param configId - The ID of the config to comment on
- * @param onCommentAdded - Optional callback when a comment is successfully added
+ * Client component for adding new comments
+ * Handles form submission and optimistic UI updates
  */
-export function CommentForm({ configId, onCommentAdded }: CommentFormProps) {
-  const { data: session } = useSession();
-  const { toast } = useToast();
-  const [content, setContent] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
+export function CommentForm({ configId, userId }: CommentFormProps) {
+  const [content, setContent] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const router = useRouter();
+
   /**
-   * Handles the submission of a new comment
+   * Handle comment form submission
    */
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     
-    if (!session?.user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to comment on this configuration.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     if (!content.trim()) {
-      toast({
-        title: "Comment required",
-        description: "Please enter a comment before submitting.",
-        variant: "destructive",
-      });
+      toast.error("Comment cannot be empty");
       return;
     }
     
@@ -62,63 +48,41 @@ export function CommentForm({ configId, onCommentAdded }: CommentFormProps) {
         body: JSON.stringify({ content }),
       });
       
-      const data = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.error || "Failed to submit comment");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to add comment");
       }
       
+      // Clear form and refresh data
       setContent("");
-      toast({
-        title: "Comment submitted",
-        description: "Your comment has been successfully posted.",
-      });
-      
-      if (onCommentAdded) {
-        onCommentAdded(data);
-      }
-    } catch (error) {
-      console.error("Error submitting comment:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to submit comment",
-        variant: "destructive",
-      });
+      toast.success("Comment added successfully");
+      router.refresh();
+    } catch (error: any) {
+      console.error("Error adding comment:", error);
+      toast.error(error.message || "Failed to add comment");
     } finally {
       setIsSubmitting(false);
     }
   };
-  
-  if (!session?.user) {
-    return (
-      <div className="bg-muted/50 rounded-md p-4 text-center text-muted-foreground">
-        Please sign in to leave a comment.
-      </div>
-    );
-  }
-  
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Textarea
-        placeholder="Share your thoughts on this configuration..."
+        placeholder="Add a comment..."
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        className="min-h-[100px] resize-y"
-        maxLength={1000}
+        className="min-h-[100px]"
         disabled={isSubmitting}
       />
-      <div className="flex justify-between items-center">
-        <div className="text-xs text-muted-foreground">
-          {content.length}/1000 characters
-        </div>
+      <div className="flex justify-end">
         <Button type="submit" disabled={isSubmitting || !content.trim()}>
           {isSubmitting ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Submitting...
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Posting...
             </>
           ) : (
-            "Submit Comment"
+            "Post Comment"
           )}
         </Button>
       </div>
