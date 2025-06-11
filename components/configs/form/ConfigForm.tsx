@@ -30,6 +30,7 @@ const configSchema = z.object({
   gamehubVersion: z.string().min(1, "GameHub version is required"),
   videoUrl: z.string().url("Must be a valid URL").optional().nullable(),
   tags: z.array(z.string()).default([]),
+  changeSummary: z.string().max(60, "Summary must be 60 characters or less").optional(),
   details: z.object({
     language: z.string().optional().nullable(),
     gameResolution: z.string().min(1, "Game resolution is required"),
@@ -87,6 +88,7 @@ export function ConfigForm({
       gamehubVersion: "",
       videoUrl: "",
       tags: [],
+      changeSummary: "",
       details: {
         language: "",
         gameResolution: "1280x720",
@@ -120,18 +122,13 @@ export function ConfigForm({
       const url = isEditing ? `/api/configs/${configId}` : "/api/configs";
       const method = isEditing ? "PATCH" : "POST";
 
-      // Add changeSummary field if editing
-      const requestData = isEditing 
-        ? { ...values, changeSummary: "Updated configuration" } 
-        : values;
-
-      // Send request to API
+      // Send request to API with values as is (changeSummary is now part of the form)
       const response = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(requestData),
+        body: JSON.stringify(values),
       });
 
       if (!response.ok) {
@@ -214,6 +211,32 @@ export function ConfigForm({
             
             <TabsContent value="tags" className="space-y-4 mt-6">
               <TagsConfigFields form={form} />
+              
+              {/* Change Summary Field - Only shown when editing */}
+              {isEditing && (
+                <div className="space-y-2 mt-6">
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="changeSummary" className="text-sm font-medium">
+                      Change Summary
+                    </label>
+                    <span className="text-xs text-muted-foreground">
+                      {form.watch("changeSummary")?.length || 0}/60
+                    </span>
+                  </div>
+                  <input
+                    id="changeSummary"
+                    className="w-full px-3 py-2 border rounded-md text-sm"
+                    placeholder="Brief summary of your changes (max 60 characters)"
+                    {...form.register("changeSummary")}
+                    maxLength={60}
+                  />
+                  {form.formState.errors.changeSummary && (
+                    <p className="text-sm text-destructive">
+                      {form.formState.errors.changeSummary.message}
+                    </p>
+                  )}
+                </div>
+              )}
             </TabsContent>
           </Tabs>
           

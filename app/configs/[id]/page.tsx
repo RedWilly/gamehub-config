@@ -7,7 +7,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Loader2, Edit, Tag, History, MessageSquare } from "lucide-react";
-import { format } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { Metadata, ResolvingMetadata } from "next";
 import { headers } from "next/headers";
 
@@ -240,11 +240,15 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
               </div>
               
               <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-                <p>Created by @{configData.createdBy?.username || "unknown"}</p>
+                <p>Created by {configData.createdBy?.username ? (
+                  <Link href={`/users/${configData.createdBy.username}`} className="hover:underline">
+                    @{configData.createdBy.username}
+                  </Link>
+                ) : "unknown"}</p>
                 <span>•</span>
                 <p>GameHub v{configData.gamehubVersion}</p>
                 <span>•</span>
-                <p>{format(new Date(configData.createdAt), "PPP")}</p>
+                <p>{formatDistanceToNow(new Date(configData.createdAt), { addSuffix: true })}</p>
               </div>
               
               <div className="mt-4 flex flex-wrap items-center gap-4">
@@ -472,7 +476,7 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
                               <span className="text-muted-foreground">
                                 {version.createdAt ? (
                                   <>
-                                    {index === 0 ? 'Updated' : 'Created'} {format(new Date(version.createdAt), 'PPP')}
+                                    {index === 0 ? 'Updated' : 'Created'} {formatDistanceToNow(new Date(version.createdAt), { addSuffix: true })}
                                   </>
                                 ) : 'Date unknown'}
                               </span>
