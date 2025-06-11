@@ -202,21 +202,23 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
     <Container>
       <div className="py-10">
         {/* Game and Config Header */}
-        <div className="flex flex-col md:flex-row gap-6 mb-8">
+        <div className="flex flex-col md:flex-row gap-4 mb-8">
           {/* Game Image */}
-          <div className="w-full md:w-2/5 lg:w-1/3 flex justify-center md:justify-start">
-            <div className="relative w-full max-w-[300px] md:w-full md:max-w-none aspect-square md:aspect-[4/3] overflow-hidden rounded-lg">
+          <div className="w-full md:w-[45%] lg:w-[40%] flex items-start">
+            <div className="relative w-full aspect-[16/9] md:aspect-[4/3] overflow-hidden">
               {gameData.imageUrl ? (
-                <Image
-                  src={gameData.imageUrl}
-                  alt={gameData.name}
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 640px) 90vw, (max-width: 768px) 40vw, (max-width: 1200px) 33vw, 30vw"
-                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Image
+                    src={gameData.imageUrl}
+                    alt={gameData.name}
+                    fill
+                    className="object-cover"
+                    priority
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 45vw, 40vw"
+                  />
+                </div>
               ) : (
-                <div className="flex items-center justify-center h-full bg-muted">
+                <div className="flex items-center justify-center h-full">
                   <p className="text-muted-foreground">No image</p>
                 </div>
               )}
@@ -224,8 +226,8 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
           </div>
           
           {/* Config Info */}
-          <div className="w-full md:w-3/5 lg:w-2/3">
-            <div className="flex flex-col h-full">
+          <div className="w-full md:w-[55%] lg:w-[60%] flex flex-col justify-start">
+            <div className="flex flex-col">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{gameData.name}</h1>
                 <p className="text-sm sm:text-base text-muted-foreground">Steam ID: {gameData.steamId}</p>
