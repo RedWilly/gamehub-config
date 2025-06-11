@@ -135,9 +135,9 @@ export default function ConfigSearchPage(): JSX.Element {
   };
 
   const clearFilters = (): void => {
-    setSearchQuery("");
     setSelectedTags([]);
-    updateURL({ q: null, tags: null, page: 1 });
+    setSortBy("popular");
+    updateURL({ tags: null, sort: null, page: 1 });
   };
 
   const handlePageChange = (newPage: number): void => {
@@ -146,9 +146,7 @@ export default function ConfigSearchPage(): JSX.Element {
 
   return (
     <Container>
-      <div className="py-10">
-        {/* <h1 className="text-3xl font-bold mb-6">Search Configurations</h1> */}
-        
+      <div className="py-10">        
         <div className="mb-8">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
@@ -160,19 +158,8 @@ export default function ConfigSearchPage(): JSX.Element {
                 className="pl-10"
               />
             </div>
-            <div className="flex items-center gap-2">
-              <Select value={sortBy} onValueChange={handleSortChange}>
-                <SelectTrigger className="w-full md:w-[180px]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SORT_OPTIONS.map(option => (
-                    <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Sheet open={false} onOpenChange={() => {}}>
+            <div className="md:hidden">
+              <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="outline" className="md:hidden">
                     <Filter className="h-4 w-4 mr-2" /> Filters
@@ -190,6 +177,17 @@ export default function ConfigSearchPage(): JSX.Element {
                         </div>
                       ))}
                     </div>
+                    <h4 className="text-sm font-medium mb-3">Sort by</h4>
+                    <Select value={sortBy} onValueChange={handleSortChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Sort by" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SORT_OPTIONS.map(option => (
+                          <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <div className="mt-6 flex justify-between">
                       <Button variant="outline" onClick={clearFilters}>Clear</Button>
                       <Button onClick={() => {}}>Apply</Button>
@@ -229,6 +227,20 @@ export default function ConfigSearchPage(): JSX.Element {
                         </div>
                       ))}
                     </div>
+                  </div>
+                  <Separator />
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">Sort by</h4>
+                    <Select value={sortBy} onValueChange={handleSortChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Sort by" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SORT_OPTIONS.map(option => (
+                          <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <Separator />
                   <Button variant="outline" onClick={clearFilters} className="w-full">Clear Filters</Button>

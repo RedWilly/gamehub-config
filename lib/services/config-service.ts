@@ -282,15 +282,27 @@ export async function getConfigsByUser(userId: string, page = 1, limit = 20) {
  * @param limit - Number of items per page.
  * @param sort - The sorting order ('newest', 'oldest', 'popular', 'updated').
  * @param tags - An array of tags to filter by.
+ * @param query - A search query to filter by game name.
  * @returns A paginated list of configurations.
  */
-export async function getConfigs(page = 1, limit = 20, sort = 'popular', tags: string[] = []) {
+export async function getConfigs(page = 1, limit = 20, sort = 'popular', tags: string[] = [], query?: string) {
   try {
-    const where: Prisma.ConfigWhereInput = {};
+    const skip = (page - 1) * limit;
 
-    if (tags.length > 0) {
+    let where: Prisma.ConfigWhereInput = {};
+
+    if (query) {
+      where.game = {
+        name: {
+          contains: query,
+          mode: 'insensitive',
+        },
+      };
+    }
+
+    if (tags && tags.length > 0) {
       where.tags = {
-        hasEvery: tags,
+        hasSome: tags,
       };
     }
 
@@ -316,7 +328,7 @@ export async function getConfigs(page = 1, limit = 20, sort = 'popular', tags: s
       prisma.config.findMany({
         where,
         orderBy,
-        skip: (page - 1) * limit,
+        skip,
         take: limit,
         include: {
           game: true,

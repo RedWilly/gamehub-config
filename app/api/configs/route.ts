@@ -47,8 +47,9 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get("sort") || 'popular';
     const tagsQuery = searchParams.get("tags");
     const tags = tagsQuery ? tagsQuery.split(',') : [];
+    const query = searchParams.get("q") || undefined;
 
-    const result = await getConfigs(page, limit, sort, tags);
+    const result = await getConfigs(page, limit, sort, tags, query);
 
     return NextResponse.json(result);
 
