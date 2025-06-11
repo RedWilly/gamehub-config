@@ -69,7 +69,7 @@ export function Header() {
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <nav className="flex items-center space-x-2">
             <Button variant="ghost" asChild>
-              <Link href="/configs">Browse</Link>
+              <Link href="/search/configs">Browse</Link>
             </Button>
             <Button variant="ghost" asChild>
               <Link href="/submit">Submit</Link>

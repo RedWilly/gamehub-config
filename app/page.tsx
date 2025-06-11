@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { TowerControl as GameController } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -15,11 +16,11 @@ export default function Home() {
             for the GameHub emulator.
           </p>
           <div className="flex gap-4">
-            <Button size="lg">
-              Browse Configs
+            <Button size="lg" asChild>
+              <Link href="/search/configs">Browse Configs</Link>
             </Button>
-            <Button size="lg" variant="outline">
-              Submit Config
+            <Button size="lg" variant="outline" asChild>
+              <Link href="/submit">Submit Config</Link>
             </Button>
           </div>
         </div>
