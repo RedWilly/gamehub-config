@@ -356,20 +356,6 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
                     </pre>
                   </div>
                 )}
-                
-                {configData.videoUrl && (
-                  <div className="mt-4 sm:mt-6">
-                    <h4 className="text-sm font-medium text-muted-foreground mb-2">Video Tutorial</h4>
-                    <div className="aspect-video relative rounded-md overflow-hidden">
-                      <iframe
-                        src={`https://www.youtube.com/embed/${getYoutubeId(configData.videoUrl)}`}
-                        className="absolute inset-0 w-full h-full"
-                        allowFullScreen
-                        title="Video tutorial"
-                      />
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -533,6 +519,25 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
             </Card>
           </TabsContent>
         </Tabs>
+        
+        {/* Video Tutorial - Moved outside tabs */}
+        {configData.videoUrl && (
+          <Card className="mt-6">
+            <CardHeader>
+              <h3 className="text-lg font-semibold">Video Tutorial</h3>
+            </CardHeader>
+            <CardContent>
+              <div className="aspect-video relative rounded-md overflow-hidden">
+                <iframe
+                  src={`https://www.youtube.com/embed/${getYoutubeId(configData.videoUrl)}`}
+                  className="absolute inset-0 w-full h-full"
+                  allowFullScreen
+                  title="Video tutorial"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </Container>
   );
