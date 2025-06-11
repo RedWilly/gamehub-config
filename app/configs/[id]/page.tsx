@@ -204,16 +204,16 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
         {/* Game and Config Header */}
         <div className="flex flex-col md:flex-row gap-6 mb-8">
           {/* Game Image */}
-          <div className="w-full md:w-1/3 lg:w-1/4">
-            <div className="relative w-full aspect-[4/3] overflow-hidden rounded-lg border bg-black/5">
+          <div className="w-full md:w-2/5 lg:w-1/3 flex justify-center md:justify-start">
+            <div className="relative w-full max-w-[300px] md:w-full md:max-w-none aspect-square md:aspect-[4/3] overflow-hidden rounded-lg">
               {gameData.imageUrl ? (
                 <Image
                   src={gameData.imageUrl}
                   alt={gameData.name}
                   fill
-                  className="object-contain"
+                  className="object-cover"
                   priority
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
+                  sizes="(max-width: 640px) 90vw, (max-width: 768px) 40vw, (max-width: 1200px) 33vw, 30vw"
                 />
               ) : (
                 <div className="flex items-center justify-center h-full bg-muted">
@@ -224,14 +224,14 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
           </div>
           
           {/* Config Info */}
-          <div className="w-full md:w-2/3 lg:w-3/4">
+          <div className="w-full md:w-3/5 lg:w-2/3">
             <div className="flex flex-col h-full">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">{gameData.name}</h1>
-                <p className="text-muted-foreground">Steam ID: {gameData.steamId}</p>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{gameData.name}</h1>
+                <p className="text-sm sm:text-base text-muted-foreground">Steam ID: {gameData.steamId}</p>
               </div>
               
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-3 sm:mt-4 flex flex-wrap gap-2">
                 {configData.tags && configData.tags.map((tag: string) => (
                   <Badge key={tag} variant="secondary">
                     <Tag className="h-3 w-3 mr-1" />
@@ -240,7 +240,7 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
                 ))}
               </div>
               
-              <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground">
                 <p>Created by {configData.createdBy?.username ? (
                   <Link href={`/users/${configData.createdBy.username}`} className="hover:underline">
                     @{configData.createdBy.username}
@@ -252,7 +252,7 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
                 <p>{formatDistanceToNow(new Date(configData.createdAt), { addSuffix: true })}</p>
               </div>
               
-              <div className="mt-4 flex flex-wrap items-center gap-4">
+              <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-3 sm:gap-4">
                 {/* Voting Buttons */}
                 <VoteButtonsServer
                   configId={id}
@@ -279,9 +279,9 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
               
               {/* Legacy Config Badge */}
               {configData.isLegacy && (
-                <div className="mt-4">
+                <div className="mt-3 sm:mt-4">
                   <Badge variant="destructive">Legacy Config</Badge>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
                     This configuration has been replaced by a newer community-approved version.
                   </p>
                 </div>
@@ -291,20 +291,22 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
         </div>
 
         {/* Config Content Tabs */}
-        <Tabs defaultValue="details" className="mt-8">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="compatibility">Compatibility</TabsTrigger>
-            <TabsTrigger value="components">Components</TabsTrigger>
-            <TabsTrigger value="versions" className="flex items-center gap-2">
-              <History className="h-4 w-4" />
-              <span>Versions</span>
-            </TabsTrigger>
-            <TabsTrigger value="comments" className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              <span>Comments</span>
-            </TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="details" className="mt-6 sm:mt-8">
+          <div className="overflow-x-auto pb-2">
+            <TabsList className="grid min-w-[600px] sm:min-w-full grid-cols-5">
+              <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="compatibility">Compatibility</TabsTrigger>
+              <TabsTrigger value="components">Components</TabsTrigger>
+              <TabsTrigger value="versions" className="flex items-center gap-1 sm:gap-2">
+                <History className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="whitespace-nowrap">Versions</span>
+              </TabsTrigger>
+              <TabsTrigger value="comments" className="flex items-center gap-1 sm:gap-2">
+                <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="whitespace-nowrap">Comments</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
           
           {/* Details Tab */}
           <TabsContent value="details" className="mt-6">
@@ -312,8 +314,8 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
               <CardHeader>
                 <h3 className="text-lg font-semibold">General Configuration</h3>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardContent className="space-y-3 sm:space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <h4 className="text-sm font-medium text-muted-foreground">GameHub Version</h4>
                     <p>{configData.gamehubVersion}</p>
@@ -336,30 +338,30 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
                 </div>
                 
                 {configData.details?.envVars && (
-                  <div className="mt-4">
+                  <div className="mt-3 sm:mt-4">
                     <h4 className="text-sm font-medium text-muted-foreground mb-1">Environment Variables</h4>
-                    <pre className="bg-muted p-3 rounded-md text-sm overflow-x-auto">
+                    <pre className="bg-muted p-2 sm:p-3 rounded-md text-xs sm:text-sm overflow-x-auto">
                       {configData.details.envVars}
                     </pre>
                   </div>
                 )}
                 
                 {configData.details?.commandLine && (
-                  <div className="mt-4">
+                  <div className="mt-3 sm:mt-4">
                     <h4 className="text-sm font-medium text-muted-foreground mb-1">Command Line</h4>
-                    <pre className="bg-muted p-3 rounded-md text-sm overflow-x-auto">
+                    <pre className="bg-muted p-2 sm:p-3 rounded-md text-xs sm:text-sm overflow-x-auto">
                       {configData.details.commandLine}
                     </pre>
                   </div>
                 )}
                 
                 {configData.videoUrl && (
-                  <div className="mt-6">
+                  <div className="mt-4 sm:mt-6">
                     <h4 className="text-sm font-medium text-muted-foreground mb-2">Video Tutorial</h4>
-                    <div className="aspect-video relative">
+                    <div className="aspect-video relative rounded-md overflow-hidden">
                       <iframe
                         src={`https://www.youtube.com/embed/${getYoutubeId(configData.videoUrl)}`}
-                        className="absolute inset-0 w-full h-full rounded-md"
+                        className="absolute inset-0 w-full h-full"
                         allowFullScreen
                         title="Video tutorial"
                       />
@@ -376,8 +378,8 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
               <CardHeader>
                 <h3 className="text-lg font-semibold">Compatibility Settings</h3>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardContent className="space-y-3 sm:space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <h4 className="text-sm font-medium text-muted-foreground">Compatibility Layer</h4>
                     <p>{configData.details?.compatLayer || "Not specified"}</p>
@@ -456,13 +458,13 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
               </CardHeader>
               <CardContent>
                 {configData.versions && configData.versions.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {configData.versions.map((version: any, index: number) => (
                       <div 
                         key={version.id} 
-                        className={`p-4 rounded-lg border ${index === 0 ? 'bg-muted/50' : ''}`}
+                        className={`p-3 sm:p-4 rounded-lg border ${index === 0 ? 'bg-muted/50' : ''}`}
                       >
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <div>
                             <div className="flex items-center gap-2">
                               <Badge variant={index === 0 ? "default" : "outline"}>
@@ -473,7 +475,7 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
                               )}
                             </div>
                             
-                            <div className="mt-2 text-sm">
+                            <div className="mt-1 sm:mt-2 text-xs sm:text-sm">
                               <span className="text-muted-foreground">
                                 {version.createdAt ? (
                                   <>
@@ -490,11 +492,11 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
                             </div>
                             
                             {version.changeSummary && (
-                              <p className="mt-1 text-sm">{version.changeSummary}</p>
+                              <p className="mt-1 text-xs sm:text-sm">{version.changeSummary}</p>
                             )}
                           </div>
                           
-                          <div className="flex items-center gap-2 mt-2 md:mt-0">
+                          <div className="flex items-center gap-2 mt-2 sm:mt-0">
                             {index !== 0 && canRevertVersions && (
                               <ConfigVersionControls
                                 versionId={version.id}
