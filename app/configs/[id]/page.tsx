@@ -204,15 +204,16 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
         {/* Game and Config Header */}
         <div className="flex flex-col md:flex-row gap-6 mb-8">
           {/* Game Image */}
-          <div className="w-full md:w-1/4">
-            <div className="relative aspect-[3/4] overflow-hidden rounded-lg border">
+          <div className="w-full md:w-1/3 lg:w-1/4">
+            <div className="relative w-full aspect-[4/3] overflow-hidden rounded-lg border bg-black/5">
               {gameData.imageUrl ? (
                 <Image
                   src={gameData.imageUrl}
                   alt={gameData.name}
                   fill
-                  className="object-cover"
+                  className="object-contain"
                   priority
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
                 />
               ) : (
                 <div className="flex items-center justify-center h-full bg-muted">
@@ -223,7 +224,7 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
           </div>
           
           {/* Config Info */}
-          <div className="w-full md:w-3/4">
+          <div className="w-full md:w-2/3 lg:w-3/4">
             <div className="flex flex-col h-full">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">{gameData.name}</h1>
