@@ -3,7 +3,6 @@
  * Displays a list of configurations created by a specific user
  */
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -11,7 +10,6 @@ import { ThumbsUp, ThumbsDown, Clock, Tag, ChevronRight } from "lucide-react";
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 
 interface Config {
@@ -36,78 +34,28 @@ interface UserConfigListProps {
   userName: string;
 }
 
-type SortOption = "newest" | "oldest" | "popular" | "updated";
-
 /**
- * UserConfigList component for displaying a user's configurations with sorting options
+ * UserConfigList component for displaying a user's configurations
  * 
  * @param props - Component props
  * @returns React component
  */
 export function UserConfigList({ configs, userName }: UserConfigListProps): JSX.Element {
-  const [sortBy, setSortBy] = useState<SortOption>("newest");
   const router = useRouter();
-
-  /**
-   * Sort configurations based on the selected sort option
-   * 
-   * @param configs - List of configurations to sort
-   * @param sortBy - Sort option
-   * @returns Sorted list of configurations
-   */
-  const sortConfigs = (configs: Config[], sortBy: SortOption): Config[] => {
-    switch (sortBy) {
-      case "newest":
-        return [...configs].sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-      case "oldest":
-        return [...configs].sort(
-          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
-      case "popular":
-        return [...configs].sort(
-          (a, b) => (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes)
-        );
-      case "updated":
-        return [...configs].sort(
-          (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-        );
-      default:
-        return configs;
-    }
-  };
-
-  const sortedConfigs = sortConfigs(configs, sortBy);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold">
-          {userName}'s Configurations
+          {userName}
         </h2>
-        
-        <Select
-          value={sortBy}
-          onValueChange={(value) => setSortBy(value as SortOption)}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newest">Newest First</SelectItem>
-            <SelectItem value="oldest">Oldest First</SelectItem>
-            <SelectItem value="popular">Most Popular</SelectItem>
-            <SelectItem value="updated">Recently Updated</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
       
       <Separator />
       
-      {sortedConfigs.length > 0 ? (
+      {configs.length > 0 ? (
         <div className="grid grid-cols-1 gap-6">
-          {sortedConfigs.map((config) => (
+          {configs.map((config) => (
             <UserConfigCard key={config.id} config={config} />
           ))}
         </div>

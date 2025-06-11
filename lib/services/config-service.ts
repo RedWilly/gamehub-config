@@ -267,16 +267,74 @@ export async function getConfigsByUser(userId: string, page = 1, limit = 20) {
     
     return {
       configs,
-      pagination: {
-        total,
-        page,
-        limit,
-        pages: Math.ceil(total / limit)
-      }
+      total
     };
   } catch (error) {
     console.error('Error fetching configs by user:', error);
     throw error;
+  }
+}
+
+/**
+ * Gets all configurations with optional sorting and filtering.
+ * 
+ * @param page - Page number for pagination.
+ * @param limit - Number of items per page.
+ * @param sort - The sorting order ('newest', 'oldest', 'popular', 'updated').
+ * @param tags - An array of tags to filter by.
+ * @returns A paginated list of configurations.
+ */
+export async function getConfigs(page = 1, limit = 20, sort = 'popular', tags: string[] = []) {
+  try {
+    const where: Prisma.ConfigWhereInput = {};
+
+    if (tags.length > 0) {
+      where.tags = {
+        hasEvery: tags,
+      };
+    }
+
+    let orderBy: Prisma.ConfigOrderByWithRelationInput = {};
+
+    switch (sort) {
+      case 'newest':
+        orderBy = { createdAt: 'desc' };
+        break;
+      case 'oldest':
+        orderBy = { createdAt: 'asc' };
+        break;
+      case 'updated':
+        orderBy = { updatedAt: 'desc' };
+        break;
+      case 'popular':
+      default:
+        orderBy = { upvotes: 'desc' };
+        break;
+    }
+
+    const [configs, total] = await Promise.all([
+      prisma.config.findMany({
+        where,
+        orderBy,
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          game: true,
+          createdBy: {
+            select: {
+              username: true,
+              image: true,
+            },
+          },
+        },
+      }),
+      prisma.config.count({ where }),
+    ]);
+
+    return { configs, total };
+  } catch (error) {
+    console.error('Error fetching configs:', error);
+    throw new Error('Failed to fetch configurations.');
   }
 }
 

@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { getConfigs } from "@/lib/services/config-service";
 import { createConfig, getConfigsByGame, getConfigsByUser } from "@/lib/services/config-service";
 import { z } from "zod";
 import { DirectXHubType, AudioDriverType } from "@prisma/client";
@@ -43,38 +44,14 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
-    const gameId = searchParams.get("gameId");
-    const userId = searchParams.get("userId");
-    
-    // For user-specific queries, still require authentication
-    if (userId) {
-      const session = await auth.api.getSession({
-        headers: request.headers,
-      });
-      
-      // Only allow users to see their own configs or admins/mods to see any user's configs
-      if (!session || (session.user.id !== userId && session.user.role === "USER")) {
-        return NextResponse.json(
-          { error: "Unauthorized" },
-          { status: 401 }
-        );
-      }
-      
-      const result = await getConfigsByUser(userId, page, limit);
-      return NextResponse.json(result);
-    }
-    
-    // If gameId is provided, get configs for that game - public access allowed
-    if (gameId) {
-      const result = await getConfigsByGame(gameId, page, limit);
-      return NextResponse.json(result);
-    }
-    
-    // If no filters provided, return error
-    return NextResponse.json(
-      { error: "Missing required query parameters: gameId or userId" },
-      { status: 400 }
-    );
+    const sort = searchParams.get("sort") || 'popular';
+    const tagsQuery = searchParams.get("tags");
+    const tags = tagsQuery ? tagsQuery.split(',') : [];
+
+    const result = await getConfigs(page, limit, sort, tags);
+
+    return NextResponse.json(result);
+
   } catch (error) {
     console.error("Error fetching configs:", error);
     return NextResponse.json(
