@@ -14,7 +14,6 @@ import { Separator } from "@/components/ui/separator";
 
 interface Config {
   id: string;
-  title: string;
   gamehubVersion: string;
   createdAt: string;
   updatedAt: string;
@@ -25,6 +24,10 @@ interface Config {
     id: string;
     name: string;
     imageUrl?: string;
+  };
+  createdBy: {
+    username: string;
+    image?: string;
   };
   tags: string[];
 }
@@ -101,29 +104,26 @@ function UserConfigCard({ config }: { config: Config }): JSX.Element {
           
           {/* Config Details */}
           <div className="w-full md:w-5/6">
-            <div className="flex flex-col md:flex-row justify-between gap-4">
-              <div className="space-y-2">
-                <h3 className="text-xl font-semibold">
+            <div className="flex flex-col justify-between h-full">
+              {/* Top section: Title and Version */}
+              <div>
+                <h3 className="text-xl font-semibold whitespace-nowrap">
                   <Link 
                     href={`/configs/${config.id}`}
                     className="hover:text-primary transition-colors"
                   >
-                    {config.title || "Configuration"}
+                    {config.game.name} @{config.createdBy.username}
                   </Link>
                 </h3>
-                
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Link 
-                    href={`/games/${config.game.id}`}
-                    className="hover:underline"
-                  >
-                    {config.game.name}
-                  </Link>
-                  <span className="mx-2">•</span>
-                  <span>GameHub {config.gamehubVersion}</span>
+                <div className="flex items-center text-sm text-muted-foreground mt-2">
+                  <span>v{config.gamehubVersion}</span>
                 </div>
-                
-                <div className="flex flex-wrap gap-2 mt-2">
+              </div>
+
+              {/* Bottom section: Tags, Votes, Date */}
+              <div className="flex justify-between items-center mt-4">
+                {/* Tags on the left */}
+                <div className="flex flex-wrap gap-2 items-center">
                   {config.tags?.slice(0, 5).map((tag, index) => (
                     <Badge key={index} variant="outline" className="text-xs">
                       <Tag className="h-3 w-3 mr-1" />
@@ -136,23 +136,24 @@ function UserConfigCard({ config }: { config: Config }): JSX.Element {
                     </Badge>
                   )}
                 </div>
-              </div>
-              
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1">
-                    <ThumbsUp className="h-4 w-4 text-green-500" />
-                    <span>{config.upvotes || 0}</span>
+
+                {/* Votes and Date on the right */}
+                <div className="flex items-center gap-6 flex-shrink-0 ml-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1">
+                      <ThumbsUp className="h-4 w-4 text-green-500" />
+                      <span>{config.upvotes || 0}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <ThumbsDown className="h-4 w-4 text-red-500" />
+                      <span>{config.downvotes || 0}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <ThumbsDown className="h-4 w-4 text-red-500" />
-                    <span>{config.downvotes || 0}</span>
+                  
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                    <span>{new Date(config.createdAt).toLocaleDateString()}</span>
                   </div>
-                </div>
-                
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  <span>{new Date(config.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
             </div>

@@ -147,7 +147,7 @@ export default function ConfigSearchPage(): JSX.Element {
   return (
     <Container>
       <div className="py-10">
-        <h1 className="text-3xl font-bold mb-6">Search Configurations</h1>
+        {/* <h1 className="text-3xl font-bold mb-6">Search Configurations</h1> */}
         
         <div className="mb-8">
           <div className="flex flex-col md:flex-row gap-4">

@@ -105,9 +105,9 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link href={`/users/${(session?.user as ExtendedUser)?.username}`}>Profile</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
+                  {/* <DropdownMenuItem asChild>
                     <Link href="/dashboard">Dashboard</Link>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
                     onClick={() => signOut()}
