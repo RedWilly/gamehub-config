@@ -6,7 +6,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Loader2, Edit, Tag, History, MessageSquare } from "lucide-react";
+import { Loader2, Edit, Tag, History, MessageSquare, PlaySquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Metadata, ResolvingMetadata } from "next";
 import { headers } from "next/headers";
@@ -295,7 +295,7 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
         {/* Config Content Tabs */}
         <Tabs defaultValue="details" className="mt-6 sm:mt-8">
           <div className="overflow-x-auto pb-2">
-            <TabsList className="grid min-w-[600px] sm:min-w-full grid-cols-5">
+            <TabsList className="grid min-w-[600px] sm:min-w-full grid-cols-6">
               <TabsTrigger value="details">Details</TabsTrigger>
               <TabsTrigger value="compatibility">Compatibility</TabsTrigger>
               <TabsTrigger value="components">Components</TabsTrigger>
@@ -307,6 +307,12 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
                 <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="whitespace-nowrap">Comments</span>
               </TabsTrigger>
+              {configData.videoUrl && (
+                <TabsTrigger value="video" className="flex items-center gap-1 sm:gap-2">
+                  <PlaySquare className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="whitespace-nowrap">Video</span>
+                </TabsTrigger>
+              )}
             </TabsList>
           </div>
           
@@ -504,6 +510,27 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
             </Card>
           </TabsContent>
           
+          {/* Video Tab */}
+          {configData.videoUrl && (
+            <TabsContent value="video" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <h3 className="text-lg font-semibold">Video Tutorial</h3>
+                </CardHeader>
+                <CardContent>
+                  <div className="aspect-video relative rounded-md overflow-hidden">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${getYoutubeId(configData.videoUrl)}`}
+                      className="absolute inset-0 w-full h-full"
+                      allowFullScreen
+                      title="Video tutorial"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+          
           {/* Comments Tab */}
           <TabsContent value="comments" className="mt-6">
             <Card>
@@ -519,25 +546,6 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
             </Card>
           </TabsContent>
         </Tabs>
-        
-        {/* Video Tutorial - Moved outside tabs */}
-        {configData.videoUrl && (
-          <Card className="mt-6">
-            <CardHeader>
-              <h3 className="text-lg font-semibold">Video Tutorial</h3>
-            </CardHeader>
-            <CardContent>
-              <div className="aspect-video relative rounded-md overflow-hidden">
-                <iframe
-                  src={`https://www.youtube.com/embed/${getYoutubeId(configData.videoUrl)}`}
-                  className="absolute inset-0 w-full h-full"
-                  allowFullScreen
-                  title="Video tutorial"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </Container>
   );

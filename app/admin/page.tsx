@@ -53,37 +53,27 @@ interface DashboardStats {
 export default function AdminDashboardPage(): JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   // Fetch dashboard statistics
   useEffect(() => {
     const fetchStats = async (): Promise<void> => {
       try {
-        // In a real implementation, this would fetch actual stats from an API
-        // For now, we'll simulate a delay and use placeholder data
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        setStats({
-          users: {
-            total: 250,
-            new: 12,
-          },
-          configs: {
-            total: 427,
-            new: 24,
-          },
-          votes: {
-            upvotes: 1243,
-            downvotes: 187,
-            total: 1430,
-          },
-          reports: {
-            open: 5,
-            total: 32,
-          },
-        });
-      } catch (error) {
-        console.error("Error fetching dashboard stats:", error);
+        const response = await fetch('/api/admin/stats');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch dashboard stats');
+        }
+        const data: DashboardStats = await response.json();
+        setStats(data);
+      } catch (err: unknown) {
+        console.error("Error fetching dashboard stats:", err);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An unknown error occurred. Please try again later.");
+        }
       } finally {
         setIsLoading(false);
       }
@@ -100,6 +90,17 @@ export default function AdminDashboardPage(): JSX.Element {
           Overview of system statistics and recent activity
         </p>
       </div>
+
+      {error && (
+        <Card className="mb-8 bg-destructive/10 border-destructive/20">
+          <CardHeader>
+            <CardTitle className="text-destructive">Error Fetching Stats</CardTitle>
+            <CardDescription className="text-destructive/80">
+              {error}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

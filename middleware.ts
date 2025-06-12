@@ -18,17 +18,22 @@ export async function middleware(request: NextRequest) {
 
   // Public routes that don't require authentication
   const publicRoutes = [
+    // API routes
+    "/api/auth",
+    "/api/users",       // Allow public access to users API
+    "/api/configs",     // Allow public access to configs API
+    "/api/games",       // Allow public access to games API
+  
+    // Page routes
     "/", 
     "/signin", 
     "/signup", 
-    "/api/auth",
-    "/users", // Allow public access to users listing
-    "/api/users", // Allow public access to users API
-    "/configs", // Allow public access to configs listing
-    "/api/configs", // Allow public access to configs API
-    "/games", // Allow public access to games listing
-    "/api/games", // Allow public access to games API
+    "/users",           // Allow public access to users listing
+    "/configs",         // Allow public access to configs listing
+    "/search/configs",  // Allow public access to configs search
+    "/games",           // Allow public access to games listing
   ];
+  
   
   // Check if the path is a public route or a specific config/game view
   if (

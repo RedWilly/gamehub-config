@@ -5,7 +5,7 @@ import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { Loader2, User, Settings, Upload, ThumbsUp, ThumbsDown, MessageSquare } from "lucide-react";
 
 import { Container } from "@/components/ui/container";
@@ -190,7 +190,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
               </div>
               
               <p className="text-sm text-muted-foreground mt-2">
-                Member since {formatDate(user.createdAt)}
+                Member since {formatDistanceToNow(user.createdAt, { addSuffix: true })}
               </p>
             </div>
           </div>
