@@ -112,7 +112,7 @@ export function ConfigList({ configs, gameId, gameName }: ConfigListProps): JSX.
       <Separator />
       
       {sortedConfigs.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-4 max-w-3xl">
           {sortedConfigs.map((config) => (
             <ConfigCard key={config.id} config={config} />
           ))}
@@ -140,10 +140,10 @@ export function ConfigList({ configs, gameId, gameName }: ConfigListProps): JSX.
 function ConfigCard({ config }: { config: Config }): JSX.Element {
   return (
     <Card className="overflow-hidden">
-      <CardContent className="p-6">
+      <CardContent className="p-4">
         <div className="flex flex-col md:flex-row justify-between gap-4">
-          <div className="space-y-2">
-            <h3 className="text-xl font-semibold">
+          <div className="space-y-1">
+            <h3 className="text-lg font-semibold">
               <Link 
                 href={`/configs/${config.id}`}
                 className="hover:text-primary transition-colors"
@@ -158,23 +158,23 @@ function ConfigCard({ config }: { config: Config }): JSX.Element {
               <span>GameHub {config.gamehubVersion}</span>
             </div>
             
-            <div className="flex flex-wrap gap-2 mt-2">
-              {config.tags?.slice(0, 5).map((tag, index) => (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {config.tags?.slice(0, 3).map((tag, index) => (
                 <Badge key={index} variant="outline" className="text-xs">
                   <Tag className="h-3 w-3 mr-1" />
                   {tag}
                 </Badge>
               ))}
-              {config.tags?.length > 5 && (
+              {config.tags?.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{config.tags.length - 5} more
+                  +{config.tags.length - 3} more
                 </Badge>
               )}
             </div>
           </div>
           
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-shrink-0">
+            <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
                 <ThumbsUp className="h-4 w-4 text-green-500" />
                 <span>{config.upvotes || 0}</span>
@@ -185,21 +185,21 @@ function ConfigCard({ config }: { config: Config }): JSX.Element {
               </div>
             </div>
             
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <Clock className="h-4 w-4" />
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Clock className="h-3 w-3" />
               <span>{new Date(config.createdAt).toLocaleDateString()}</span>
             </div>
           </div>
         </div>
       </CardContent>
       
-      <CardFooter className="bg-muted/50 p-4 flex justify-end">
+      <CardFooter className="bg-muted/50 p-2 flex justify-end">
         <Link 
           href={`/configs/${config.id}`}
-          className="text-sm font-medium text-primary flex items-center hover:underline"
+          className="text-xs font-medium text-primary flex items-center hover:underline"
         >
           View Details
-          <ChevronRight className="h-4 w-4 ml-1" />
+          <ChevronRight className="h-3 w-3 ml-1" />
         </Link>
       </CardFooter>
     </Card>

@@ -9,11 +9,11 @@ const containerVariants = cva('mx-auto px-4 sm:px-6 lg:px-8', {
       constrainedPadded: 'max-w-7xl px-4 sm:px-6 lg:px-8',
       fullMobileBreakpointPadded: 'container mx-auto sm:px-6 lg:px-8',
       breakpointPadded: 'container mx-auto px-4 sm:px-6 lg:px-8',
-      narrowConstrainedPadded: 'max-w-7xl px-4 sm:px-6 lg:px-8 max-w-3xl',
+      narrowConstrainedPadded: 'max-w-3xl px-4 sm:px-6 lg:px-8',
     },
   },
   defaultVariants: {
-    variant: 'narrowConstrainedPadded',
+    variant: 'constrainedPadded',
   },
 })
 
@@ -35,11 +35,7 @@ const Container: React.FC<ContainerProps> = ({
 
   return (
     <Comp className={containerClasses} {...props}>
-      {variant === 'narrowConstrainedPadded' ? (
-        <div className="mx-auto max-w-3xl">{children}</div>
-      ) : (
-        children
-      )}
+      {children}
     </Comp>
   )
 }

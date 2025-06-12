@@ -57,7 +57,7 @@ export function UserConfigList({ configs, userName }: UserConfigListProps): JSX.
       <Separator />
       
       {configs.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-4 max-w-3xl">
           {configs.map((config) => (
             <UserConfigCard key={config.id} config={config} />
           ))}
@@ -82,11 +82,11 @@ export function UserConfigList({ configs, userName }: UserConfigListProps): JSX.
 function UserConfigCard({ config }: { config: Config }): JSX.Element {
   return (
     <Card className="overflow-hidden">
-      <CardContent className="p-6">
-        <div className="flex flex-col md:flex-row gap-6">
+      <CardContent className="p-4">
+        <div className="flex gap-4">
           {/* Game Image */}
-          <div className="w-full md:w-1/6">
-            <div className="relative aspect-[3/4] overflow-hidden rounded-md border">
+          <div className="flex-shrink-0">
+            <div className="relative w-16 h-16 overflow-hidden rounded-md border">
               {config.game.imageUrl ? (
                 <Image
                   src={config.game.imageUrl}
@@ -103,11 +103,11 @@ function UserConfigCard({ config }: { config: Config }): JSX.Element {
           </div>
           
           {/* Config Details */}
-          <div className="w-full md:w-5/6">
+          <div className="flex-grow min-w-0">
             <div className="flex flex-col justify-between h-full">
               {/* Top section: Title and Version */}
               <div>
-                <h3 className="text-xl font-semibold whitespace-nowrap">
+                <h3 className="text-lg font-semibold truncate">
                   <Link 
                     href={`/configs/${config.id}`}
                     className="hover:text-primary transition-colors"
@@ -115,59 +115,56 @@ function UserConfigCard({ config }: { config: Config }): JSX.Element {
                     {config.game.name} @{config.createdBy.username}
                   </Link>
                 </h3>
-                <div className="flex items-center text-sm text-muted-foreground mt-2">
+                <div className="flex items-center text-sm text-muted-foreground mt-1">
                   <span>v{config.gamehubVersion}</span>
                 </div>
               </div>
 
-              {/* Bottom section: Tags, Votes, Date */}
-              <div className="flex justify-between items-center mt-4">
-                {/* Tags on the left */}
-                <div className="flex flex-wrap gap-2 items-center">
-                  {config.tags?.slice(0, 5).map((tag, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      <Tag className="h-3 w-3 mr-1" />
-                      {tag}
-                    </Badge>
-                  ))}
-                  {config.tags?.length > 5 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{config.tags.length - 5} more
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Votes and Date on the right */}
-                <div className="flex items-center gap-6 flex-shrink-0 ml-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1">
-                      <ThumbsUp className="h-4 w-4 text-green-500" />
-                      <span>{config.upvotes || 0}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <ThumbsDown className="h-4 w-4 text-red-500" />
-                      <span>{config.downvotes || 0}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span>{new Date(config.createdAt).toLocaleDateString()}</span>
-                  </div>
-                </div>
+              {/* Tags */}
+              <div className="flex flex-wrap gap-1 mt-2">
+                {config.tags?.slice(0, 3).map((tag, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
+                    <Tag className="h-3 w-3 mr-1" />
+                    {tag}
+                  </Badge>
+                ))}
+                {config.tags?.length > 3 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{config.tags.length - 3} more
+                  </Badge>
+                )}
               </div>
+            </div>
+          </div>
+
+          {/* Votes and Date */}
+          <div className="flex flex-col items-end justify-between gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <ThumbsUp className="h-4 w-4 text-green-500" />
+                <span>{config.upvotes || 0}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <ThumbsDown className="h-4 w-4 text-red-500" />
+                <span>{config.downvotes || 0}</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Clock className="h-3 w-3" />
+              <span>{new Date(config.createdAt).toLocaleDateString()}</span>
             </div>
           </div>
         </div>
       </CardContent>
       
-      <CardFooter className="bg-muted/50 p-4 flex justify-end">
+      <CardFooter className="bg-muted/50 p-2 flex justify-end">
         <Link 
           href={`/configs/${config.id}`}
-          className="text-sm font-medium text-primary flex items-center hover:underline"
+          className="text-xs font-medium text-primary flex items-center hover:underline"
         >
           View Details
-          <ChevronRight className="h-4 w-4 ml-1" />
+          <ChevronRight className="h-3 w-3 ml-1" />
         </Link>
       </CardFooter>
     </Card>
