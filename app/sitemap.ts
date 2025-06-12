@@ -36,7 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  // Add static routes
+  // static routes
   const staticUrls = [
     {
       url: baseUrl,
@@ -44,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'daily' as 'daily',
       priority: 1.0,
     },
-    // Add other static pages here, e.g.:
+    // other static pages here, e.g.:
     // {
     //   url: `${baseUrl}/about`,
     //   lastModified: new Date(),
