@@ -12,8 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-import { ConfigFormValues } from "./ConfigForm";
+import {type ConfigFormValues } from "@/lib/validations/config";
 
 interface ComponentsConfigFieldsProps {
   form: UseFormReturn<ConfigFormValues>;

@@ -9,6 +9,7 @@ import { useState } from "react";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { type VoteInput } from "@/lib/validations/config";
 
 interface VoteButtonsClientProps {
   configId: string;
@@ -61,12 +62,16 @@ export function VoteButtonsClient({
       }
       
       // Submit vote to API
+      const voteData: VoteInput = { 
+        value: userVote === value ? 0 : value 
+      };
+      
       const response = await fetch(`/api/configs/${configId}/vote`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ value: userVote === value ? 0 : value }),
+        body: JSON.stringify(voteData),
       });
       
       if (!response.ok) {

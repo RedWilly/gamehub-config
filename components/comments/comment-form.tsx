@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { type CommentInput } from "@/lib/validations/config";
 
 interface CommentFormProps {
   configId: string;
@@ -40,12 +41,14 @@ export function CommentForm({ configId, userId }: CommentFormProps) {
     setIsSubmitting(true);
     
     try {
+      const commentData: CommentInput = { content };
+      
       const response = await fetch(`/api/configs/${configId}/comments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify(commentData),
       });
       
       if (!response.ok) {

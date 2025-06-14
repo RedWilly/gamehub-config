@@ -7,7 +7,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { DirectXHubType, AudioDriverType } from "@prisma/client";
 import Image from "next/image";
 
@@ -23,34 +22,7 @@ import { CompatibilityConfigFields } from "./CompatibilityConfigFields";
 import { ComponentsConfigFields } from "./ComponentsConfigFields";
 import { TagsConfigFields } from "./TagsConfigFields";
 import { SubmitButton } from "./SubmitButton";
-
-// Schema for config validation
-const configSchema = z.object({
-  gameId: z.string().min(1, "Game ID is required"),
-  gamehubVersion: z.string().min(1, "GameHub version is required"),
-  videoUrl: z.string().url("Must be a valid URL").optional().nullable(),
-  tags: z.array(z.string()).default([]),
-  changeSummary: z.string().max(60, "Summary must be 60 characters or less").optional(),
-  details: z.object({
-    language: z.string().optional().nullable(),
-    gameResolution: z.string().min(1, "Game resolution is required"),
-    directxHub: z.nativeEnum(DirectXHubType),
-    envVars: z.string().optional().nullable(),
-    commandLine: z.string().optional().nullable(),
-    compatLayer: z.string().min(1, "Compatibility layer is required"),
-    gpuDriver: z.string().min(1, "GPU driver is required"),
-    audioDriver: z.nativeEnum(AudioDriverType),
-    dxvkVersion: z.string().optional().nullable(),
-    vkd3dVersion: z.string().optional().nullable(),
-    cpuTranslator: z.string().min(1, "CPU translator is required"),
-    cpuCoreLimit: z.string().optional().nullable(),
-    vramLimit: z.string().optional().nullable(),
-    components: z.array(z.string()).default([]),
-  }),
-});
-
-// Type for form values
-export type ConfigFormValues = z.infer<typeof configSchema>;
+import { configFormSchema, type ConfigFormValues } from "@/lib/validations/config";
 
 interface ConfigFormProps {
   gameId: string;
@@ -82,7 +54,7 @@ export function ConfigForm({
 
   // Initialize form with default values
   const form = useForm<ConfigFormValues>({
-    resolver: zodResolver(configSchema),
+    resolver: zodResolver(configFormSchema),
     defaultValues: defaultValues || {
       gameId,
       gamehubVersion: "",

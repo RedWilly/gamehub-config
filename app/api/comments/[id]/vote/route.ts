@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { commentVoteSchema } from "@/lib/validations/config";
 
 /**
  * POST handler for voting on a comment
@@ -37,15 +38,18 @@ export async function POST(
     }
 
     const commentId = params.id;
-    const { value } = await request.json();
-
-    // Validate vote value
-    if (typeof value !== "number" || ![1, -1, 0].includes(value)) {
+    const body = await request.json();
+    
+    // Validate vote value using the shared schema
+    const validationResult = commentVoteSchema.safeParse(body);
+    if (!validationResult.success) {
       return NextResponse.json(
         { error: "Vote value must be 1 (upvote), -1 (downvote), or 0 (remove vote)" },
         { status: 400 }
       );
     }
+    
+    const { value } = validationResult.data;
 
     // Check if comment exists
     const comment = await prisma.comment.findUnique({

@@ -6,12 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
-
-// Validation schema for vote request
-const voteSchema = z.object({
-  value: z.number().int().min(-1).max(1),
-});
+import { voteSchema } from "@/lib/validations/config";
 
 /**
  * POST handler to cast or update a vote on a configuration

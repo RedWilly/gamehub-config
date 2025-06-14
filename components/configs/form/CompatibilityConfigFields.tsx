@@ -11,8 +11,8 @@ import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessa
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import {type ConfigFormValues } from "@/lib/validations/config";
 
-import { ConfigFormValues } from "./ConfigForm";
 
 // Compatibility layer presets
 const COMPAT_LAYER_PRESETS = [

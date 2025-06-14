@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { type CommentVoteInput } from "@/lib/validations/config";
 
 /**
  * Type definition for a comment
@@ -130,12 +131,14 @@ export function CommentItem({
     }
     
     try {
+      const voteData: CommentVoteInput = { value: newVote };
+      
       const response = await fetch(`/api/comments/${comment.id}/vote`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ value: newVote }),
+        body: JSON.stringify(voteData),
       });
       
       const data = await response.json();

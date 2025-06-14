@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { commentSchema } from "@/lib/validations/config";
 
 /**
  * GET handler for retrieving comments for a specific config
@@ -143,22 +144,18 @@ export async function POST(
     }
 
     const configId = params.id;
-    const { content } = await request.json();
-
-    // Validate input
-    if (!content || typeof content !== "string" || content.trim().length === 0) {
+    const body = await request.json();
+    
+    // Validate input using the shared schema
+    const validationResult = commentSchema.safeParse(body);
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: "Comment content is required" },
+        { error: "Invalid comment data", issues: validationResult.error.issues },
         { status: 400 }
       );
     }
-
-    if (content.length > 1000) {
-      return NextResponse.json(
-        { error: "Comment cannot exceed 1000 characters" },
-        { status: 400 }
-      );
-    }
+    
+    const { content } = validationResult.data;
 
     // Validate that the config exists
     const config = await prisma.config.findUnique({

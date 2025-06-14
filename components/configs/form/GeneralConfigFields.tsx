@@ -10,8 +10,8 @@ import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessa
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {type ConfigFormValues } from "@/lib/validations/config";
 
-import { ConfigFormValues } from "./ConfigForm";
 
 // Common resolution presets
 const RESOLUTION_PRESETS = [

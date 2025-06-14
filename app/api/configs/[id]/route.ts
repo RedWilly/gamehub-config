@@ -7,35 +7,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getConfig, updateConfig } from "@/lib/services/config-service";
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
-import { DirectXHubType, AudioDriverType, Role } from "@prisma/client";
+import { Role } from "@prisma/client";
 import { canEditContent, canDeleteContent, canReadConfig } from "@/lib/permissions";
-
-// Schema for config update validation
-const updateConfigSchema = z.object({
-  gamehubVersion: z.string().min(1).optional(),
-  videoUrl: z.string().url().nullable().optional(),
-  tags: z.array(z.string()).optional(),
-  details: z
-    .object({
-      language: z.string().nullable().optional(),
-      gameResolution: z.string().min(1).optional(),
-      directxHub: z.nativeEnum(DirectXHubType).optional(),
-      envVars: z.string().nullable().optional(),
-      commandLine: z.string().nullable().optional(),
-      compatLayer: z.string().min(1).optional(),
-      gpuDriver: z.string().min(1).optional(),
-      audioDriver: z.nativeEnum(AudioDriverType).optional(),
-      dxvkVersion: z.string().min(1).optional(),
-      vkd3dVersion: z.string().min(1).optional(),
-      cpuTranslator: z.string().min(1).optional(),
-      cpuCoreLimit: z.string().min(1).optional(),
-      vramLimit: z.string().min(1).optional(),
-      components: z.array(z.string()).optional(),
-    })
-    .optional(),
-  changeSummary: z.string().min(1, "Change summary is required"),
-});
+import { updateConfigSchema } from "@/lib/validations/config";
 
 /**
  * GET /api/configs/[id]

@@ -7,32 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getConfigs } from "@/lib/services/config-service";
 import { createConfig, getConfigsByGame, getConfigsByUser } from "@/lib/services/config-service";
-import { z } from "zod";
-import { DirectXHubType, AudioDriverType } from "@prisma/client";
-
-// Schema for config creation validation
-const configSchema = z.object({
-  gameId: z.string().min(1, "Game ID is required"),
-  gamehubVersion: z.string().min(1, "GameHub version is required"),
-  videoUrl: z.string().url().optional().nullable(),
-  tags: z.array(z.string()).default([]),
-  details: z.object({
-    language: z.string().optional().nullable(),
-    gameResolution: z.string().min(1, "Game resolution is required"),
-    directxHub: z.nativeEnum(DirectXHubType),
-    envVars: z.string().optional().nullable(),
-    commandLine: z.string().optional().nullable(),
-    compatLayer: z.string().min(1, "Compatibility layer is required"),
-    gpuDriver: z.string().min(1, "GPU driver is required"),
-    audioDriver: z.nativeEnum(AudioDriverType),
-    dxvkVersion: z.string().min(1, "DXVK version is required"),
-    vkd3dVersion: z.string().min(1, "VKD3D version is required"),
-    cpuTranslator: z.string().min(1, "CPU translator is required"),
-    cpuCoreLimit: z.string().min(1, "CPU core limit is required"),
-    vramLimit: z.string().min(1, "VRAM limit is required"),
-    components: z.array(z.string()).default([])
-  })
-});
+import { createConfigSchema } from "@/lib/validations/config";
 
 /**
  * GET /api/configs
@@ -92,7 +67,7 @@ export async function POST(request: NextRequest) {
     // Parse and validate request body
     const body = await request.json();
     
-    const validationResult = configSchema.safeParse(body);
+    const validationResult = createConfigSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
         { error: "Invalid request data", details: validationResult.error.format() },

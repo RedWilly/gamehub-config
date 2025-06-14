@@ -12,8 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import {type ConfigFormValues } from "@/lib/validations/config";
 
-import { ConfigFormValues } from "./ConfigForm";
 
 // Predefined tags that users can select from
 const PREDEFINED_TAGS = [
