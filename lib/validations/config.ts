@@ -40,7 +40,10 @@ export const configDetailsSchema = z.object({
 export const createConfigSchema = z.object({
   gameId: z.string().min(1, "Game ID is required"),
   gamehubVersion: z.string().min(1, "GameHub version is required"),
-  videoUrl: z.string().url("Must be a valid URL").optional().nullable(),
+  videoUrl: z.string().optional().nullable().refine(
+    (val) => !val || val.trim() === "" || /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)/.test(val),
+    "Must be a valid YouTube URL or empty"
+  ),
   tags: z.array(z.string()).default([]),
   details: configDetailsSchema,
 });
@@ -58,7 +61,10 @@ export const configFormSchema = createConfigSchema.extend({
  */
 export const updateConfigSchema = z.object({
   gamehubVersion: z.string().min(1).optional(),
-  videoUrl: z.string().url().nullable().optional(),
+  videoUrl: z.string().optional().nullable().refine(
+    (val) => !val || val.trim() === "" || /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)/.test(val),
+    "Must be a valid YouTube URL or empty"
+  ),
   tags: z.array(z.string()).optional(),
   details: configDetailsSchema.partial().optional(),
   changeSummary: z.string().min(1, "Change summary is required"),
