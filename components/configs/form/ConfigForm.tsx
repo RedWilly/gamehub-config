@@ -112,13 +112,18 @@ export function ConfigForm({
       // Get the saved config data
       const savedConfig = await response.json();
 
-      // Show success message
+      // Show success message with redirect info
       toast.success(
-        isEditing ? "Configuration updated successfully" : "Configuration created successfully"
+        isEditing ? "Configuration updated successfully" : "Configuration created successfully",
+        {
+          description: "Redirecting to configuration page...",
+          duration: 2000
+        }
       );
 
-      // Redirect to the config details page
-      router.push(`/configs/${savedConfig.id}`);
+      setTimeout(() => {
+        router.push(`/configs/${savedConfig.id}`);
+      }, 500);
     } catch (error: any) {
       console.error("Error saving configuration:", error);
       setSubmitError(error.message || "Failed to save configuration");
