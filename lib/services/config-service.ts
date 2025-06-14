@@ -78,7 +78,8 @@ export async function createConfig(data: CreateConfigInput & { userId: string })
           cpuTranslator: data.details.cpuTranslator,
           cpuCoreLimit: data.details.cpuCoreLimit,
           vramLimit: data.details.vramLimit,
-          components: data.details.components
+          components: data.details.components,
+          notes: data.details.notes
         }
       });
 
@@ -355,6 +356,7 @@ export async function updateConfig(
       cpuCoreLimit?: string;
       vramLimit?: string;
       components?: string[];
+      notes?: string;
     };
   }, 
   changeSummary: string
@@ -402,7 +404,8 @@ export async function updateConfig(
             cpuTranslator: data.details.cpuTranslator !== undefined ? data.details.cpuTranslator : config.details?.cpuTranslator || '',
             cpuCoreLimit: data.details.cpuCoreLimit !== undefined ? data.details.cpuCoreLimit : config.details?.cpuCoreLimit || '',
             vramLimit: data.details.vramLimit !== undefined ? data.details.vramLimit : config.details?.vramLimit || '',
-            components: data.details.components !== undefined ? data.details.components : config.details?.components || []
+            components: data.details.components !== undefined ? data.details.components : config.details?.components || [],
+            notes: data.details.notes !== undefined ? data.details.notes : config.details?.notes
           }
         });
       }
@@ -503,7 +506,8 @@ export async function revertConfigToVersion(
           cpuTranslator: configSnapshot.cpuTranslator || '',
           cpuCoreLimit: configSnapshot.cpuCoreLimit || '',
           vramLimit: configSnapshot.vramLimit || '',
-          components: configSnapshot.components || []
+          components: configSnapshot.components || [],
+          notes: configSnapshot.notes
         }
       });
 

@@ -32,6 +32,7 @@ export const configDetailsSchema = z.object({
   cpuCoreLimit: z.string().min(1, "CPU core limit is required"),
   vramLimit: z.string().min(1, "VRAM limit is required"),
   components: z.array(z.string()).default([]),
+  notes: z.string().optional().nullable(),
 });
 
 /**

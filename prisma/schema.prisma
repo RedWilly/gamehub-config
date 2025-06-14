@@ -142,6 +142,7 @@ model ConfigDetails {
   cpuCoreLimit   String
   vramLimit      String
   components     String[]
+  notes          String? 
 }
 
 model ConfigVersion {

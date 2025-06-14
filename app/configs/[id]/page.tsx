@@ -362,6 +362,15 @@ export default async function ConfigDetailsPage({ params }: ConfigDetailsPagePro
                     </pre>
                   </div>
                 )}
+                
+                {configData.details?.notes && (
+                  <div className="mt-3 sm:mt-4">
+                    <h4 className="text-sm font-medium text-muted-foreground mb-1">Additional Notes</h4>
+                    <div className="bg-muted p-2 sm:p-3 rounded-md text-xs sm:text-sm overflow-x-auto whitespace-pre-wrap">
+                      {configData.details.notes}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

@@ -76,6 +76,7 @@ export function ConfigForm({
         cpuCoreLimit: "No Limit",
         vramLimit: "No Limit",
         components: [],
+        notes: "",
       },
     },
   });
@@ -90,6 +91,11 @@ export function ConfigForm({
     setSubmitError(null);
 
     try {
+      // For editing, validate that change summary is provided
+      if (isEditing && !values.changeSummary?.trim()) {
+        throw new Error("Change summary is required when updating a configuration");
+      }
+
       // Prepare request URL and method based on whether we're creating or editing
       const url = isEditing ? `/api/configs/${configId}` : "/api/configs";
       const method = isEditing ? "PATCH" : "POST";
@@ -127,7 +133,9 @@ export function ConfigForm({
     } catch (error: any) {
       console.error("Error saving configuration:", error);
       setSubmitError(error.message || "Failed to save configuration");
-      toast.error(error.message || "Failed to save configuration");
+      toast.error("Configuration Error", {
+        description: error.message || "Failed to save configuration"
+      });
     } finally {
       setIsSubmitting(false);
     }
