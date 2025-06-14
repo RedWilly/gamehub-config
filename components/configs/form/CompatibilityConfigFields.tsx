@@ -11,65 +11,15 @@ import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessa
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import {type ConfigFormValues } from "@/lib/validations/config";
-
-
-// Compatibility layer presets
-const COMPAT_LAYER_PRESETS = [
-  { label: "Proton 9.0-arm64x-2", value: "Proton9.0-arm64x-2" },
-  { label: "Proton 9.0-x64-2", value: "Proton9.0-x64-2" },
-  { label: "Wine 10.0-x64-1", value: "wine10.0-x64-1" },
-  { label: "Wine 9.5.0-x64-1", value: "wine9.5.0-x64-1" },
-  { label: "Wine 9.16-x64-1", value: "wine9.16-x64-1" },
-];
-
-// CPU translator presets
-const CPU_TRANSLATOR_PRESETS = [
-  { label: "Box64-0.35", value: "Box64-0.35" },
-  { label: "Box64-0.32.1", value: "Box64-0.32.1" },
-  { label: "Box64-0.28", value: "Box64-0.28" },
-];
-
-// VKD3D translator presets
-const VKD3D_TRANSLATOR_PRESETS = [
-  { label: "Vkd3d-proton-2.14.1", value: "vkd3d-proton-2.14.1" },
-  { label: "Vkd3d-2.13", value: "vkd3d-2.13" },
-  { label: "Vkd3d-2.12", value: "vkd3d-2.12" },
-  { label: "None", value: "none" }
-];
-
-// DXVK translator presets
-const DXVK_TRANSLATOR_PRESETS = [
-  { label: "Dxvk-2.6.1-async", value: "dxvk-2.6.1-async" },
-  { label: "Dxvk-2.6", value: "dxvk-2.6" },
-  { label: "Dxvk-2.5.3", value: "dxvk-2.5.3" },
-  { label: "Dxvk-2.4", value: "dxvk-2.4" },
-  { label: "Dxvk-2.3.1", value: "dxvk-2.3.1" },
-  { label: "Dxvk-2.2", value: "dxvk-2.2" },
-  { label: "None", value: "none" }
-];
-
-// CPU core limit options
-const CPU_CORE_LIMITS = [
-  { label: "No Limit", value: "No Limit" },
-  { label: "1 Core", value: "1 Core" },
-  { label: "2 Cores", value: "2 Cores" },
-  { label: "3 Cores", value: "3 Cores" },
-  { label: "4 Cores", value: "4 Cores" },
-  { label: "5 Cores", value: "5 Cores" },
-  { label: "6 Cores", value: "6 Cores" },
-  { label: "7 Cores", value: "7 Cores" }
-];
-
-// VRAM limit options
-const VRAM_LIMITS = [
-  { label: "No Limit", value: "No Limit" },
-  { label: "512MB", value: "512MB" },
-  { label: "1GB", value: "1GB" },
-  { label: "2GB", value: "2GB" },
-  { label: "3GB", value: "3GB" },
-  { label: "4GB", value: "4GB" }
-];
+import { type ConfigFormValues } from "@/lib/validations/config";
+import { 
+  COMPAT_LAYER_PRESETS,
+  CPU_TRANSLATOR_PRESETS,
+  VKD3D_TRANSLATOR_PRESETS,
+  DXVK_TRANSLATOR_PRESETS,
+  CPU_CORE_LIMITS,
+  VRAM_LIMITS
+} from "@/lib/constants/config-presets";
 
 interface CompatibilityConfigFieldsProps {
   form: UseFormReturn<ConfigFormValues>;

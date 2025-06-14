@@ -10,33 +10,8 @@ import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessa
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import {type ConfigFormValues } from "@/lib/validations/config";
-
-
-// Common resolution presets
-const RESOLUTION_PRESETS = [
-  {label: "800 x 600", value: "800x600"},
-  { label: "960 x 544", value: "960x544" },
-  { label: "1280 x 720", value: "1280x720" },
-  { label: "1920 x 1080", value: "1920x1080" },
-  { label: "Custom", value: "custom" } // Custom resolution format: "width x height"
-];
-
-// Language presets
-const LANGUAGE_PRESETS = [
-  { label: "English (US)", value: "en_US" },
-  { label: "English (UK)", value: "en_GB" },
-  { label: "French", value: "fr_FR" },
-  { label: "German", value: "de_DE" },
-  { label: "Spanish", value: "es_ES" },
-  { label: "Italian", value: "it_IT" },
-  { label: "Japanese", value: "ja_JP" },
-  { label: "Korean", value: "ko_KR" },
-  { label: "Russian", value: "ru_RU" },
-  { label: "Chinese (Simplified)", value: "zh_CN" },
-  { label: "Chinese (Traditional)", value: "zh_TW" },
-  { label: "Custom", value: "custom" } // Custom language code
-];
+import { type ConfigFormValues } from "@/lib/validations/config";
+import { RESOLUTION_PRESETS, LANGUAGE_PRESETS } from "@/lib/constants/config-presets";
 
 interface GeneralConfigFieldsProps {
   form: UseFormReturn<ConfigFormValues>;

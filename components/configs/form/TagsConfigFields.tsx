@@ -12,14 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import {type ConfigFormValues } from "@/lib/validations/config";
-
-
-// Predefined tags that users can select from
-const PREDEFINED_TAGS = [
-  { id: "optimized-fps", label: "Optimized for FPS" },
-  { id: "low-end-devices", label: "Low-end Devices" },
-];
+import { type ConfigFormValues } from "@/lib/validations/config";
+import { PREDEFINED_TAGS } from "@/lib/constants/config-presets";
 
 interface TagsConfigFieldsProps {
   form: UseFormReturn<ConfigFormValues>;
