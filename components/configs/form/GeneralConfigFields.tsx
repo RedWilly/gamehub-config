@@ -246,7 +246,7 @@ export function GeneralConfigFields({ form }: GeneralConfigFieldsProps): JSX.Ele
               />
             </FormControl>
             <FormDescription>
-              Optional YouTube or other video URL showing your config in action
+              Optional YouTube video URL showing your config in action
             </FormDescription>
             <FormMessage />
           </FormItem>
