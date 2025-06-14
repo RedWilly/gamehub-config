@@ -12,17 +12,19 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { type CommentInput } from "@/lib/validations/config";
+import { type CommentType } from "./comment-item";
 
 interface CommentFormProps {
   configId: string;
-  userId: string;
+  userId?: string;
+  onCommentAdded?: (newComment: CommentType) => void;
 }
 
 /**
  * Client component for adding new comments
  * Handles form submission and optimistic UI updates
  */
-export function CommentForm({ configId, userId }: CommentFormProps) {
+export function CommentForm({ configId, userId, onCommentAdded }: CommentFormProps) {
   const [content, setContent] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const router = useRouter();
@@ -56,10 +58,19 @@ export function CommentForm({ configId, userId }: CommentFormProps) {
         throw new Error(errorData.error || "Failed to add comment");
       }
       
+      // Get the newly created comment from the response
+      const newComment = await response.json();
+      
       // Clear form and refresh data
       setContent("");
       toast.success("Comment added successfully");
-      router.refresh();
+      
+      // Call the onCommentAdded callback if provided
+      if (onCommentAdded) {
+        onCommentAdded(newComment);
+      } else {
+        router.refresh();
+      }
     } catch (error: any) {
       console.error("Error adding comment:", error);
       toast.error(error.message || "Failed to add comment");
