@@ -98,6 +98,12 @@ export function ProfileImageUploader({ onSuccess, onCancel }: ProfileImageUpload
       }
       
       const data = await response.json();
+      // Show success toast
+      toast({
+        title: "Image uploaded",
+        description: "Your profile image will be updated shortly.",
+        variant: "default",
+      });
       onSuccess(data.imageUrl);
     } catch (error: any) {
       console.error('Error uploading image:', error);

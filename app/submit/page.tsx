@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface GameData {
   name: string;
@@ -26,6 +27,9 @@ export default function SubmitPage() {
     e.preventDefault();
     if (!steamId) {
       setError("Please enter a Steam App ID.");
+      toast.error("Missing Steam ID", {
+        description: "Please enter a Steam App ID."
+      });
       return;
     }
 
@@ -57,9 +61,18 @@ export default function SubmitPage() {
         steam_appid: steamAppIdNum,
         header_image: apiResponseData.imageUrl,
       });
+      
+      // Show success toast when game is found
+      toast.success("Game found", {
+        description: `Found ${apiResponseData.name}`
+      });
     } catch (err: any) {
       console.error("Error fetching or processing game data:", err);
       setError(err.message || "An unexpected error occurred.");
+      // Show error toast
+      toast.error("Game search failed", {
+        description: err.message || "Failed to find game with this Steam ID"
+      });
     } finally {
       setIsLoading(false);
     }

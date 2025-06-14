@@ -8,6 +8,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Container } from "@/components/ui/container";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,6 +40,9 @@ export default function NewConfigPage(): JSX.Element {
     const fetchGameData = async (): Promise<void> => {
       if (!steamId) {
         setError("No Steam ID provided");
+        toast.error("Missing Steam ID", {
+          description: "No Steam ID was provided. Please select a game first."
+        });
         setIsLoading(false);
         return;
       }
@@ -56,9 +60,19 @@ export default function NewConfigPage(): JSX.Element {
 
         const data = await response.json();
         setGameData(data);
+        
+        // Show success toast when game data is loaded
+        toast.info("Ready to create config", {
+          description: `Creating configuration for ${data.name}`
+        });
       } catch (err: any) {
         console.error("Error fetching game data:", err);
         setError(err.message || "Failed to load game data");
+        
+        // Show error toast
+        toast.error("Game data error", {
+          description: err.message || "Failed to load game data for this Steam ID"
+        });
       } finally {
         setIsLoading(false);
       }

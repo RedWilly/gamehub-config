@@ -75,12 +75,37 @@ export function VoteButtonsClient({
       });
       
       if (!response.ok) {
-        throw new Error("Failed to submit vote");
+        // Try to extract error message from response
+        let errorMessage = "Failed to submit vote";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseError) {
+          console.error("Error parsing error response:", parseError);
+        }
+        throw new Error(errorMessage);
       }
       
-    } catch (error) {
+      // Show success toast based on the vote action
+      if (userVote === value) {
+        toast.success("Vote removed", {
+          description: "Your vote has been removed"
+        });
+      } else if (value === 1) {
+        toast.success("Upvoted", {
+          description: "Thanks for your positive feedback!"
+        });
+      } else {
+        toast.success("Downvoted", {
+          description: "Thanks for your feedback"
+        });
+      }
+      
+    } catch (error: any) {
       console.error("Error submitting vote:", error);
-      toast.error("Failed to submit vote. Please try again.");
+      toast.error("Vote Error", {
+        description: error.message || "Failed to submit vote. Please try again."
+      });
       
       // Revert optimistic update on error
       setUpvotes(initialUpvotes);

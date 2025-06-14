@@ -54,9 +54,25 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       const data = await response.json();
       setProfileData(data);
       setCurrentPage(page);
+      
+      // Show toast notification for profile data loaded (only on first load)
+      if (page === 1) {
+        toast({
+          title: "Profile loaded",
+          description: `Viewing ${data.user.username}'s profile`,
+          variant: "default"
+        });
+      }
     } catch (error: any) {
       console.error("Error fetching profile data:", error);
       setError(error.message || "Failed to load profile data");
+      
+      // Show error toast
+      toast({
+        title: "Error loading profile",
+        description: error.message || "Failed to load profile data",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }

@@ -8,6 +8,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Container } from "@/components/ui/container";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -45,6 +46,9 @@ export default function EditConfigPage({ params }: EditConfigPageProps): JSX.Ele
     const fetchData = async (): Promise<void> => {
       if (!id) {
         setError("No config ID provided");
+        toast.error("Configuration Error", {
+          description: "No configuration ID was provided"
+        });
         setIsLoading(false);
         return;
       }
@@ -69,9 +73,16 @@ export default function EditConfigPage({ params }: EditConfigPageProps): JSX.Ele
 
         const gameData = await gameResponse.json();
         setGameData(gameData);
+        
+        toast.info("Configuration loaded", {
+          description: `Editing configuration for ${gameData.name}`
+        });
       } catch (err: any) {
         console.error("Error fetching data:", err);
         setError(err.message || "Failed to load configuration data");
+        toast.error("Loading Error", {
+          description: err.message || "Failed to load configuration data"
+        });
       } finally {
         setIsLoading(false);
       }

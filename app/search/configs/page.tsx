@@ -9,6 +9,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Search, Filter, X } from "lucide-react";
 import debounce from 'debounce';
+import { toast } from "sonner";
 
 import { Container } from "@/components/ui/container";
 import { Input } from "@/components/ui/input";
