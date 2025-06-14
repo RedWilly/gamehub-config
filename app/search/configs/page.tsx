@@ -16,26 +16,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { COMMON_TAGS, SORT_OPTIONS } from "@/lib/constants/config-presets";
 
 import { UserConfigList } from "@/components/configs/list/UserConfigList";
-
-// Common tags for filtering
-const COMMON_TAGS = [
-  "Optimized for FPS",
-  "Low-end Devices",
-];
-
-// Sort options
-const SORT_OPTIONS = [
-  { label: "Most Popular", value: "popular" },
-  { label: "Newest First", value: "newest" },
-  { label: "Oldest First", value: "oldest" },
-  { label: "Recently Updated", value: "updated" }
-];
 
 /**
  * ConfigSearchPage component for searching and filtering configurations

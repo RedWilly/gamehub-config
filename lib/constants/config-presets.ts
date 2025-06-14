@@ -138,3 +138,21 @@ export const DXVK_VALUES = DXVK_TRANSLATOR_PRESETS.map(preset => preset.value);
 export const CPU_CORE_LIMIT_VALUES = CPU_CORE_LIMITS.map(preset => preset.value);
 export const VRAM_LIMIT_VALUES = VRAM_LIMITS.map(preset => preset.value);
 export const TAG_IDS = PREDEFINED_TAGS.map(tag => tag.id);
+
+/**
+ * Common tags for filtering in search interfaces
+ */
+export const COMMON_TAGS = [
+  "Optimized for FPS",
+  "Low-end Devices",
+];
+
+/**
+ * Sort options for config listings
+ */
+export const SORT_OPTIONS = [
+  { label: "Most Popular", value: "popular" },
+  { label: "Newest First", value: "newest" },
+  { label: "Oldest First", value: "oldest" },
+  { label: "Recently Updated", value: "updated" }
+];

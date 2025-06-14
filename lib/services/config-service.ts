@@ -6,33 +6,7 @@
 import { prisma } from '../prisma';
 import { DirectXHubType, AudioDriverType, Prisma } from '@prisma/client';
 import { slugify } from '../utils';
-
-/**
- * Interface for config creation data
- */
-export interface CreateConfigData {
-  gameId: string;
-  userId: string;
-  gamehubVersion: string;
-  videoUrl?: string | null;
-  tags: string[];
-  details: {
-    language?: string | null;
-    gameResolution: string;
-    directxHub: DirectXHubType;
-    envVars?: string | null;
-    commandLine?: string | null;
-    compatLayer: string;
-    gpuDriver: string;
-    audioDriver: AudioDriverType;
-    dxvkVersion: string;
-    vkd3dVersion: string;
-    cpuTranslator: string;
-    cpuCoreLimit: string;
-    vramLimit: string;
-    components: string[];
-  };
-}
+import { type CreateConfigInput } from '@/lib/validations/config';
 
 /**
  * Creates a new game configuration
@@ -40,7 +14,7 @@ export interface CreateConfigData {
  * @param data - Configuration data
  * @returns The created config or null if creation failed
  */
-export async function createConfig(data: CreateConfigData) {
+export async function createConfig(data: CreateConfigInput & { userId: string }) {
   try {
     // Get game and user for slug generation
     const [game, user] = await Promise.all([
