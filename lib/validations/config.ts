@@ -85,6 +85,82 @@ export const commentVoteSchema = z.object({
   value: z.number().int().min(-1).max(1),
 });
 
+/**
+ * Schema for game data in config responses
+ */
+export const gameSchema = z.object({
+  id: z.string(),
+  steamId: z.string(),
+  name: z.string(),
+  imageUrl: z.string(),
+});
+
+/**
+ * Schema for user data in config responses
+ */
+export const userSchema = z.object({
+  id: z.string(),
+  username: z.string(),
+  image: z.string().nullable(),
+});
+
+/**
+ * Schema for config version data
+ */
+export const configVersionSchema = z.object({
+  id: z.string(),
+  configId: z.string(),
+  userId: z.string(),
+  versionNumber: z.number(),
+  configSnapshot: configDetailsSchema,
+  changeSummary: z.string(),
+  createdAt: z.date(),
+  updatedBy: z.object({
+    username: z.string(),
+  }),
+});
+
+/**
+ * Schema for complete config with details
+ */
+export const configWithDetailsSchema = z.object({
+  id: z.string(),
+  gameId: z.string(),
+  userId: z.string(),
+  gamehubVersion: z.string(),
+  videoUrl: z.string().nullable(),
+  isLegacy: z.boolean(),
+  isHidden: z.boolean(),
+  upvotes: z.number(),
+  downvotes: z.number(),
+  slug: z.string(),
+  tags: z.array(z.string()),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  game: gameSchema,
+  createdBy: userSchema,
+  details: configDetailsSchema,
+  versions: z.array(configVersionSchema),
+});
+
+/**
+ * Schema for pagination data
+ */
+export const paginationSchema = z.object({
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  pages: z.number(),
+});
+
+/**
+ * Schema for paginated config results
+ */
+export const paginatedConfigsSchema = z.object({
+  configs: z.array(configWithDetailsSchema),
+  pagination: paginationSchema,
+});
+
 // TypeScript type exports
 export type ConfigDetails = z.infer<typeof configDetailsSchema>;
 export type CreateConfigInput = z.infer<typeof createConfigSchema>;
@@ -93,3 +169,17 @@ export type UpdateConfigInput = z.infer<typeof updateConfigSchema>;
 export type VoteInput = z.infer<typeof voteSchema>;
 export type CommentInput = z.infer<typeof commentSchema>;
 export type CommentVoteInput = z.infer<typeof commentVoteSchema>;
+export type GameData = z.infer<typeof gameSchema>;
+export type UserData = z.infer<typeof userSchema>;
+export type ConfigVersion = z.infer<typeof configVersionSchema>;
+export type ConfigWithDetails = z.infer<typeof configWithDetailsSchema>;
+export type PaginationData = z.infer<typeof paginationSchema>;
+
+/**
+ * Generic type for paginated results
+ * Allows for different types of items in the configs array
+ */
+export type PaginatedConfigs<T = ConfigWithDetails> = {
+  configs: T[];
+  pagination: PaginationData;
+};

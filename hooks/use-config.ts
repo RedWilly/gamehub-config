@@ -4,7 +4,12 @@
  */
 
 import { useState } from "react";
-import { CreateConfigData, UpdateConfigData, ConfigWithDetails, PaginatedConfigs } from "@/types/config";
+import { 
+  type CreateConfigInput, 
+  type UpdateConfigInput, 
+  type ConfigWithDetails, 
+  type PaginatedConfigs 
+} from "@/lib/validations/config";
 
 /**
  * Hook for managing game configurations
@@ -21,7 +26,7 @@ export function useConfig() {
    * @param data - Configuration data to create
    * @returns The created config or null if creation failed
    */
-  const createConfig = async (data: Omit<CreateConfigData, "userId">): Promise<ConfigWithDetails | null> => {
+  const createConfig = async (data: CreateConfigInput): Promise<ConfigWithDetails | null> => {
     setIsLoading(true);
     setError(null);
     
@@ -150,7 +155,7 @@ export function useConfig() {
    */
   const updateConfig = async (
     configId: string, 
-    data: UpdateConfigData
+    data: UpdateConfigInput
   ): Promise<ConfigWithDetails | null> => {
     setIsLoading(true);
     setError(null);
