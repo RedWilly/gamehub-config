@@ -18,7 +18,6 @@ import {type ConfigFormValues } from "@/lib/validations/config";
 const COMPAT_LAYER_PRESETS = [
   { label: "Proton 9.0-arm64x-2", value: "Proton9.0-arm64x-2" },
   { label: "Proton 9.0-x64-2", value: "Proton9.0-x64-2" },
-  { label: "Proton 7.0-x64", value: "Proton7.0-x64" },
   { label: "Wine 10.0-x64-1", value: "wine10.0-x64-1" },
   { label: "Wine 9.5.0-x64-1", value: "wine9.5.0-x64-1" },
   { label: "Wine 9.16-x64-1", value: "wine9.16-x64-1" },
