@@ -5,6 +5,9 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { username, admin, customSession } from "better-auth/plugins";
 import { ac, adminRole, moderatorRole, userRole, publicRole } from "./permissions";
 import { prisma } from "./prisma";
+import { nextCookies } from "better-auth/next-js";
+import { sendEmail } from "./email";
+
 
 // Create and export auth instance
 export const auth = betterAuth({
@@ -14,15 +17,12 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
         requireEmailVerification: false,
-        sendResetPassword: async ({ user, url, token }, request) => {
+        sendResetPassword: async ({ user, url }) => {
             /**
              * Sends a password reset email using Resend via sendEmail utility.
              * @param user - The user object requesting reset
              * @param url - The reset link containing the token
-             * @param token - The reset token
-             * @param request - The original request object
              */
-            const { sendEmail } = await import('./email');
             await sendEmail({
                 to: user.email,
                 subject: 'Reset your password',
@@ -69,5 +69,6 @@ export const auth = betterAuth({
                 session
             };
         }),
+        nextCookies()
     ],
 });
