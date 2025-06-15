@@ -356,7 +356,7 @@ export async function updateConfig(
       cpuCoreLimit?: string;
       vramLimit?: string;
       components?: string[];
-      notes?: string;
+      notes?: string | null;
     };
   }, 
   changeSummary: string
