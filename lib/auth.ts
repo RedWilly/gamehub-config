@@ -9,11 +9,26 @@ import { prisma } from "./prisma";
 // Create and export auth instance
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
-		provider: "postgresql",
-	}),
+        provider: "postgresql",
+    }),
     emailAndPassword: {
         enabled: true,
         requireEmailVerification: false,
+        sendResetPassword: async ({ user, url, token }, request) => {
+            /**
+             * Sends a password reset email using Resend via sendEmail utility.
+             * @param user - The user object requesting reset
+             * @param url - The reset link containing the token
+             * @param token - The reset token
+             * @param request - The original request object
+             */
+            const { sendEmail } = await import('./email');
+            await sendEmail({
+                to: user.email,
+                subject: 'Reset your password',
+                text: `Click the link to reset your password: ${url}`,
+            });
+        },
     },
     socialProviders: {
         github: {
@@ -29,11 +44,11 @@ export const auth = betterAuth({
                 admin: adminRole,
                 moderator: moderatorRole,
                 user: userRole,
-                public: publicRole 
+                public: publicRole
             },
             defaultRole: "USER",
             adminRoles: ["ADMIN"],
-            publicRole: "public" 
+            publicRole: "public"
         }),
         customSession(async ({ user, session }) => {
             // Get the full user data including suspendedUntil and role field
@@ -44,7 +59,7 @@ export const auth = betterAuth({
                     role: true
                 }
             });
-            
+
             return {
                 user: {
                     ...user,
