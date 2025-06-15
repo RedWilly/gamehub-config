@@ -29,6 +29,7 @@ export async function middleware(request: NextRequest) {
     "/signin", 
     "/signup",
     "/forgot-password",
+    "/reset-password",
     "/users",           // Allow public access to users listing
     "/configs",         // Allow public access to configs listing
     "/search/configs",  // Allow public access to configs search

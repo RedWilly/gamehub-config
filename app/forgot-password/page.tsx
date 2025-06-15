@@ -23,8 +23,10 @@ export default function ForgotPasswordPage() {
 
     try {
       setLoading(true);
-      const result = await authClient.forgetPassword({ email });
-      console.log('Password reset response:', result);
+      const result = await authClient.forgetPassword({ 
+        email,
+        redirectTo: "/reset-password",
+      });
       
       setLoading(false);
 

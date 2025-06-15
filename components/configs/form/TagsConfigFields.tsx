@@ -137,7 +137,7 @@ export function TagsConfigFields({ form }: TagsConfigFieldsProps): JSX.Element {
                 ))}
               </div>
               
-              <div>
+              {/* <div>
                 <FormLabel className="text-sm">Custom Tags</FormLabel>
                 <div className="flex space-x-2 mt-1">
                   <FormControl>
@@ -158,7 +158,7 @@ export function TagsConfigFields({ form }: TagsConfigFieldsProps): JSX.Element {
                     Add
                   </Button>
                 </div>
-              </div>
+              </div> */}
               
               {selectedTags.length > 0 && (
                 <div className="border rounded-md p-4">

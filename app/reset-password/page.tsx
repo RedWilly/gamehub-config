@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -31,25 +32,40 @@ export default function ResetPasswordPage() {
       toast.error("Passwords do not match.");
       return;
     }
+    
     try {
       setLoading(true);
-      const res = await fetch("/api/auth/email/password/reset", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password }),
+      const result = await authClient.resetPassword({
+        token,
+        newPassword: password,
       });
+      
       setLoading(false);
 
-      if (res.ok) {
+      // Handle the response based on the actual structure
+      if (result && 
+          typeof result === 'object' && 
+          'data' in result && 
+          result.data && 
+          typeof result.data === 'object' && 
+          'status' in result.data && 
+          result.data.status === true) {
+        // Success case - status is true inside data object
         toast.success("Password reset successfully. You can now log in.");
-        router.replace("/auth/signin");
+        router.replace("/signin");
+      } else if (result && 'error' in result && result.error) {
+        // Error case - error object exists
+        const errorMessage = (result as any).error?.message || "Failed to reset password. Token may be invalid or expired.";
+        toast.error(errorMessage);
       } else {
-        const data = await res.json().catch(() => ({}));
-        toast.error(data?.error || "Failed to reset password. Token may be invalid or expired.");
+        // Fallback for any other case
+        console.log('Unexpected response structure:', result);
+        toast.error("Failed to reset password. Please try again.");
       }
-    } catch {
+    } catch (error) {
       setLoading(false);
-      toast.error("Unexpected error. Please try again later.");
+      console.error("Password reset error:", error);
+      toast.error("An unexpected error occurred. Please try again later.");
     }
   };
 
