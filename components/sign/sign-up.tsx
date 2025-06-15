@@ -38,7 +38,7 @@ export default function SignUp() {
 						<Label htmlFor="username">Username</Label>
 						<Input
 							id="username"
-							placeholder="yourusername"
+							placeholder="username"
 							required
 							onChange={(e) => {
 								setUsername(e.target.value);

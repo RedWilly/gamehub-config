@@ -119,11 +119,11 @@ export function Header() {
               </DropdownMenu>
             ) : (
               <>
-                <Button variant="ghost" asChild>
+                {/* <Button variant="ghost" asChild>
                   <Link href="/signin">Sign In</Link>
-                </Button>
+                </Button> */}
                 <Button asChild>
-                  <Link href="/signup">Sign Up</Link>
+                  <Link href="/signin">Sign In</Link>
                 </Button>
               </>
             )}

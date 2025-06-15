@@ -35,7 +35,7 @@ export default function SignIn() {
               <Input
                 id="username"
                 type="text"
-                placeholder="yourusername"
+                placeholder="username"
                 required
                 onChange={(e) => {
                   setUsername(e.target.value);
@@ -117,7 +117,7 @@ export default function SignIn() {
               "justify-between flex-col"
             )}>
               
-				<Button
+				{/* <Button
                   variant="outline"
                   className={cn(
                     "w-full gap-2"
@@ -148,7 +148,7 @@ export default function SignIn() {
 				></path>
 			</svg>
                   Sign in with GitHub
-                </Button>
+        </Button> */}
             </div>
         </div>
       </CardContent>
