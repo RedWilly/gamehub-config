@@ -16,6 +16,20 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isApiRoute = pathname.startsWith("/api/");
 
+  // Retrieve existing session cookie (if any)
+  const sessionCookie = getSessionCookie(request);
+
+  // If an authenticated user tries to reach an auth-only page, send them to the main search page
+  const authPages: string[] = [
+    "/signin",
+    "/signup",
+    "/forgot-password",
+    "/reset-password",
+  ];
+  if (sessionCookie && authPages.includes(pathname)) {
+    return NextResponse.redirect(new URL("/search/configs", request.url));
+  }
+
   // Public routes that don't require authentication
   const publicRoutes = [
     // API routes
@@ -47,8 +61,8 @@ export async function middleware(request: NextRequest) {
   ) {
     // For API config/game endpoints, only allow GET requests without authentication
     if ((pathname.startsWith("/api/configs/") || pathname.startsWith("/api/games/")) && request.method !== "GET") {
-      // For non-GET methods on config/game endpoints, check authentication
-      const sessionCookie = getSessionCookie(request);
+      // For non-GET methods on config/game endpoints, check authentication (cookie already retrieved)
+
       if (!sessionCookie) {
         // Return JSON response for API routes instead of redirecting
         return NextResponse.json(
@@ -61,8 +75,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for session cookie (lightweight check without database query)
-  const sessionCookie = getSessionCookie(request);
+  // Session cookie was already retrieved earlier
+
   
   // If no session cookie exists, handle differently based on route type
   if (!sessionCookie) {
