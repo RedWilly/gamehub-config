@@ -12,7 +12,7 @@ import type { auth } from "./auth"; // Import the auth instance as a type
  * Create auth client with plugins for authentication and authorization
  */
 export const authClient = createAuthClient({
-    baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000",
+    baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
     plugins: [ 
         usernameClient(),
         adminClient({
